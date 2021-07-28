@@ -8,7 +8,7 @@ const init = async () => {
   await caelum.connect();
 
   // Register Token.
-  const token = await caelum.getTokenDetails(1);
+  const token = await caelum.getTokenDetails(6);
   console.log('Token', token);
   // console.log('Token', await caelum.getTokenDetails(1));
 

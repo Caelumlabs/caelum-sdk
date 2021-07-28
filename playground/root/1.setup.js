@@ -13,7 +13,7 @@ const init = async () => {
   debug(`Admin: ${tokenAdmin.mnemonic}`);
 
   // Register Token.
-  await caelum.registerToken('//Alice', 2, 'Caelum Ecosistem', 'CLAB', tokenAdmin.address);
+  await caelum.registerToken('//Alice', 6, 'Caelum Ecosistem', 'CLAB', tokenAdmin.address);
 
   // Disconnect.
   await caelum.disconnect();

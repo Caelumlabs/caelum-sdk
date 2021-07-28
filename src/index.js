@@ -36,8 +36,11 @@ module.exports = class Caelum {
   }
 
   async registerToken(mnemonic, tokenId, tokenName, tokenSymbol, tokenAdmin) {
+    // Create Admin.
     const admin = this.blockchain.setKeyring(mnemonic);
-    // Create a new token
+    await this.blockchain.transferTokens(tokenAdmin, 3000000000000000);
+
+    // Create a new token.
     await this.blockchain.createToken(tokenId, admin, 100);
     await this.blockchain.setTokenMetadata(tokenId, tokenName, tokenSymbol, 0);
     await this.blockchain.transferTokenOwnership(tokenId, tokenAdmin);
