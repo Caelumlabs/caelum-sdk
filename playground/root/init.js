@@ -1,5 +1,5 @@
 const GOVERNANCE = 'ws://127.0.0.1:9944';
-const Caelum = require('../src/index');
+const Caelum = require('../../src/index');
 
 // Main function.
 const init = async () => {

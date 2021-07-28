@@ -30,19 +30,17 @@ module.exports = class Caelum {
 
   async sendGas(mnemonic, addr) {
     this.blockchain.setKeyring(mnemonic);
-    console.log('Send gas to ' + addr)
     await this.blockchain.transferTokens(addr, 3000000000000000);
-    return await this.blockchain.addrState(addr)
+    const state = await this.blockchain.addrState(addr);
+    return state;
   }
 
-  async registerToken(mnemonic, tokenId, tokenName, tokenSymbol) {
+  async registerToken(mnemonic, tokenId, tokenName, tokenSymbol, tokenAdmin) {
     const admin = this.blockchain.setKeyring(mnemonic);
     // Create a new token
-    console.log(admin);
-    const amount = await this.blockchain.addrState(admin.address);
-    console.log(amount);
-    let result = await this.blockchain.createToken(tokenId, admin, 100);
-    // result = await this.blockchain.setTokenMetadata(tokenId, tokenName, tokenSymbol, 0);
+    await this.blockchain.createToken(tokenId, admin, 100);
+    await this.blockchain.setTokenMetadata(tokenId, tokenName, tokenSymbol, 0);
+    await this.blockchain.transferTokenOwnership(tokenId, tokenAdmin);
   }
 
   async getTokenDetails(tokenId) {

@@ -1,5 +1,4 @@
 const GOVERNANCE = 'ws://127.0.0.1:9944';
-const debug = require('debug')('did:setup');
 const Caelum = require('../../src/index');
 
 // Main function.
@@ -8,12 +7,10 @@ const init = async () => {
   const caelum = new Caelum(GOVERNANCE);
   await caelum.connect();
 
-  // New keys for token admin. Get some gas.
-  const tokenAdmin = await caelum.newKeys();
-  debug(`Admin: ${tokenAdmin.mnemonic}`);
-
   // Register Token.
-  await caelum.registerToken('//Alice', 2, 'Caelum Ecosistem', 'CLAB', tokenAdmin.address);
+  const token = await caelum.getTokenDetails(1);
+  console.log('Token', token);
+  // console.log('Token', await caelum.getTokenDetails(1));
 
   // Disconnect.
   await caelum.disconnect();
