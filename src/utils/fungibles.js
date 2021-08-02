@@ -19,7 +19,7 @@ module.exports = class Token {
    * Parameters:
    * - `id`: The identifier of the new token. This must not be currently in use to identify an existing token.
    * - `admin`: The admin of this class of tokens. The admin is the initial address of each member of the token class's admin team.
-   * - `minBalance`: The minimum balance of this new token that any single account must have.
+   * - `minBalance`: The minimum balance of this new token that any single account must have. 
    *    If an account's balance is reduced below this, then it collapses to zero.
    *
    * @param {object} exec Executor class.
@@ -29,25 +29,10 @@ module.exports = class Token {
    * @param {number} minBalance The minimum balance.
    * @returns {Promise} of transaction
    */
-  // async createNewToken (exec, keypair, id, admin, minBalance) {
-  //   console.log(id, ' - ', admin, ' - ', minBalance)
-  //   const transaction = await exec.api.tx.assets.createNewToken(id, minBalance)
-  //   return await exec.execTransaction(keypair, transaction)
-  // }
 
-  async createToken(exec, keypair, id, admin, minBalance) {
-    const transaction = await exec.api.tx.assets.create(id, admin, minBalance, true);
-    return await exec.execTransaction(keypair, transaction);
-  }
-
-  async createNewToken(exec, keypair, id, admin, minBalance) {
-    const transaction = await exec.api.tx.assets.create(id, admin, minBalance);
-    const result = await exec.execTransaction(keypair, transaction);
-    if (result == true) {
-      const trx = await exec.api.tx.assets.forceAssetStatus(id, admin, admin, admin, admin, minBalance, true, false);
-      return await exec.execTransaction(keypair, trx);
-    }
-    return false;
+  async createToken (exec, keypair, id, admin, minBalance) {
+    const transaction = await exec.api.tx.assets.create(id, admin, minBalance, true)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -57,17 +42,17 @@ module.exports = class Token {
    * Unlike `create`, no funds are reserved.
    *
    * - `id`: The identifier of the new token. This must not be currently in use to identify an existing token.
-   * - `owner`: The owner of this class of tokens. The owner has full superuser permissions over this token,
+   * - `owner`: The owner of this class of tokens. The owner has full superuser permissions over this token, 
    *    but may later change and configure the permissions using `transfer_ownership`and `set_team`.
    * - `isSufficient`: Controls that the account should have sufficient tokens free.
-   * - `minBalance`: The minimum balance of this new token that any single account must have.
+   * - `minBalance`: The minimum balance of this new token that any single account must have. 
    *    If an account's balance is reduced below this, then it collapses to zero.
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the new token.
-   * @param {object} owner The owner of this class of tokens.
-   * @param {bool} isSufficient Controls that the account should have sufficient tokens free.
+   * @param {number} id The identifier of the new token. 
+   * @param {object} owner The owner of this class of tokens. 
+   * @param {bool} isSufficient Controls that the account should have sufficient tokens free. 
    * @param {number} minBalance The minimum balance.
    * @returns {Promise} of transaction
    */
@@ -536,9 +521,33 @@ module.exports = class Token {
    * @param {number} amount The amount of tokens to transfer.
    * @returns {Promise} of transaction
    */
-  async transferTokenApproval(exec, keypair, id, owner, destination, amount) {
-    const transaction = await exec.api.tx.assets.transferApproved(id, owner, destination, amount);
-    return await exec.execTransaction(keypair, transaction);
+  async transferTokenApproval (exec, keypair, id, owner, destination, amount) {
+    const transaction = await exec.api.tx.assets.transferApproved(id, owner, destination, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
+
+  /**
+   * Set tokens ids and costs for transactions.
+   * Origin must be root.
+   *
+   * @param {object} exec Executor class.
+   * @param {object} keypair Account's keypair. Signs transaction
+   * @param {object} tokenAndCost The set ob tokens ids and costs for transactions. 
+   * @returns {Promise} of transaction
+   */
+  async setTokensAndCosts (exec, keypair, tokenAndCost) {
+    const transaction = await exec.api.tx.idSpace.setTokenAndCost(tokenAndCost)
+    return await exec.execTransaction(keypair, transaction)
+  } 
+
+  /**
+   * Get the Token id and cost of all transactions
+   *
+   * @param {object} exec Executor class.
+   * @returns {Promise} of transaction
+   */
+  async getTokenIdAndCosts (exec) {
+    return await exec.api.query.idSpace.tokenAndCost()
   }
 
   /**

@@ -118,59 +118,59 @@ module.exports = class Executor {
           }
           resolve(result);
         }
-      });
-    });
+      })
+    })
   }
 
-  getStatus(status) {
-    if (status.isFuture) { return 'Is Future'; }
-    if (status.isReady) { return 'Is Ready'; }
-    if (status.isBroadcast) { return 'Is broadcast'; }
-    if (status.isInBlock) { return 'Is Inblock'; }
-    if (status.isRetracted) { return 'Is retracted'; }
-    if (status.isFinalityTimeout) { return 'Is FinalityTimeout'; }
-    if (status.isFinalized) { return 'Is finalized'; }
-    if (status.isUsurped) { return 'Is Usurped'; }
-    if (status.isDropped) { return 'Is dropped'; }
-    if (status.isInvalid) { return 'Is invalid'; }
-    return 'Else';
+  getStatus (status) {
+  if (status.isFuture) { return 'Is Future'}
+  if (status.isReady) {return 'Is Ready'}
+  if (status.isBroadcast) { return 'Is broadcast'}
+  if (status.isInBlock) { return 'Is Inblock'}
+  if (status.isRetracted) {return 'Is retracted'}
+  if (status.isFinalityTimeout) { return 'Is FinalityTimeout'}
+  if (status.isFinalized) {return 'Is finalized'}
+  if (status.isUsurped) { return 'Is Usurped'}
+  if (status.isDropped) {return 'Is dropped'}
+  if (status.isInvalid) {return 'Is invalid'}
+  return 'Else'
   }
 
-  errorType(error) {
-    if (error.isOther) { return 'isOther'; }
-    if (error.isCannotLookup) { return 'isCannotLookup'; }
-    if (error.isBadOrigin) { return 'isBadOrigin'; }
-    if (error.isModule) { return 'isModule'; }
-    if (error.isConsumerRemaining) { return 'isConsumerRemaining'; }
-    if (error.isNoProviders) { return 'isNoProviders'; }
-    if (error.isToken) { return 'isToken'; }
-    if (error.isArithmetic) { return 'isArithmetic'; }
-    return 'Other';
+  errorType (error) {
+  if (error.isOther) { return 'isOther' }
+  if (error.isCannotLookup) { return 'isCannotLookup' }
+  if (error.isBadOrigin) { return 'isBadOrigin' }
+  if (error.isModule) { return 'isModule' }
+  if (error.isConsumerRemaining) { return 'isConsumerRemaining' }
+  if (error.isNoProviders) { return 'isNoProviders' }
+  if (error.isToken) { return 'isToken' }
+  if (error.isArithmetic) { return 'isArithmetic' }
+  return 'Other'
   }
 
-  async executeTransaction(keypair, transaction) {
-    return new Promise(async (resolve) => {
-      await transaction
-        .signAndSend(keypair, ({ status, events, dispatchError }) => {
-          // status would still be set, but in the case of error we can shortcut
-          // to just check it (so an error would indicate InBlock or Finalized)
-          if (dispatchError) {
-            console.log('DispatchError');
-            if (dispatchError.isModule) {
-              // for module errors, we have the section indexed, lookup
-              const decoded = this.api.registry.findMetaError(dispatchError.asModule);
-              const { documentation, name, section } = decoded;
+  async executeTransaction (keypair, transaction) {
+      return new Promise(async (resolve) => {
+        await transaction
+              .signAndSend(keypair, ({ status, events, dispatchError }) => {
+              // status would still be set, but in the case of error we can shortcut
+              // to just check it (so an error would indicate InBlock or Finalized)
+              if (dispatchError) {
+                console.log('DispatchError')
+                if (dispatchError.isModule) {
+                  // for module errors, we have the section indexed, lookup
+                  const decoded = this.api.registry.findMetaError(dispatchError.asModule);
+                  const { documentation, name, section } = decoded;
 
-              console.log(`${section}.${name}: ${documentation.join(' ')}`);
-            } else {
-              // Other, CannotLookup, BadOrigin, no extra info
-              console.log(dispatchError.toString());
-            }
-            resolve(false);
-          }
-          console.log('No dispatch error');
-          resolve(true);
-        });
-    });
+                  console.log(`${section}.${name}: ${documentation.join(' ')}`);
+                } else {
+                  // Other, CannotLookup, BadOrigin, no extra info
+                  console.log(dispatchError.toString());
+                }
+                resolve(false)
+              }
+              console.log('No dispatch error')
+              resolve(true)
+        })
+      })
   }
 };

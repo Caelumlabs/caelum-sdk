@@ -207,28 +207,29 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
-   * Rotate Key : changes the current key for a DID
-   * Assumes Key Type = 0
+   * Registers aa Arweave storage Address (Vec<u8>)for a DID
    *
    * @param {string} did DID
-   * @param {object} pubKey Public Key to be rotated (Vec<u8>)
-   * @param {number} typ Public Key type. Defaults to zero
+   * @param {object} storageAddress Arweave storage address (Vec<u8>)
    * @returns {Promise} Result of the transaction
    */
-  async rotateKey(did, pubKey, typ = 0) {
-    return this.dids.rotateKey(this.exec, this.keypair, did, pubKey, typ);
+  async setStorageAddress (did, storageAddress) {
+    return this.dids.setStorageAddress(this.exec, this.keypair, did, storageAddress)
   }
 
   /**
-   * Rotate Key Type: changes the current key for a specific type for a DID
+   * Set new key : changes the current key for a DID
+   * If did == null or undefined adds the new key to the sender
+   * If did has value moves the key from sender to DID receiver
+   * Assumes Key Type = 0
    *
+   * @param {object} pubKey Public Key to be created/rotated (string)
+   * @param {number} typ Public Key type. Defaults to zero
    * @param {string} did DID
-   * @param {object} pubKey Public Key to be rotated (Vec<u8>)
-   * @param {number} typ Public Key type
    * @returns {Promise} Result of the transaction
    */
-  async rotateKeyType(did, pubKey, typ) {
-    return this.dids.rotateKeyType(this.exec, this.keypair, did, pubKey, typ);
+  async setKey (pubKey, did = null, typ = 0) {
+    return this.dids.setKey(this.exec, this.keypair, did, pubKey, typ)
   }
 
   /**
@@ -238,19 +239,21 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} newOwner New owner's Account (AccountId)
    * @returns {Promise} Result of the transaction
    */
-  async changeOwner(did, newOwner) {
-    return this.dids.changeOwner(this.exec, this.keypair, did, newOwner);
+  async changeOwner (did, newOwner) {
+    return this.dids.changeOwner(this.exec, this.keypair, did, newOwner)
   }
 
   /**
-   * Assign a Credential for a DID
+   * Assign a Hash/Credential for a DID
    *
    * @param {string} did DID
    * @param {object} credential Credential Hash (Vec<u8>)
+   * @param {object} certificate Certificate from which hash is generated
+   * @param {object} typ Type
    * @returns {Promise} Result of the transaction
    */
-  async assignCredential(did, credential) {
-    return this.dids.assignCredential(this.exec, this.keypair, did, credential);
+  async putHash (did, credential, certificate, typ) {
+    return this.dids.putHash(this.exec, this.keypair, did, credential, certificate, typ)
   }
 
   /**
@@ -305,14 +308,14 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
-   * Remove a Credential for a DID
+   * Revoke a Credential for a DID
    *
    * @param {string} did DID
    * @param {object} credential Credential Hash (Vec<u8>)
    * @returns {Promise} Result of the transaction
    */
-  async removeCredential(did, credential) {
-    return this.dids.removeCredential(this.exec, this.keypair, did, credential);
+  async revokeHash (did, credential) {
+    return this.dids.revokeHash(this.exec, this.keypair, did, credential)
   }
 
   /**
@@ -354,9 +357,9 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} owner DID
    * @returns {string} DID
    */
-  async getDidFromOwner(owner = null) {
-    const execOwner = owner == null ? this.keypair.address : owner;
-    return this.dids.getDidFromOwner(this.exec, execOwner);
+  async getDidFromOwner (owner = null) {
+    const execOwner = owner == null ? this.keypair.address : owner
+    return this.dids.getDidFromOwner(this.exec, execOwner)
   }
 
   /**
@@ -367,8 +370,20 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {number} typ Public Key type
    * @returns {string} Actual Key
    */
-  async getActualDidKey(did, typ = 0) {
-    return this.dids.getActualDidKey(this.exec, did, typ);
+  async getActualDidKey (did, typ = 0) {
+    return this.dids.getActualDidKey(this.exec, this.keypair, did, typ)
+  }
+
+  /**
+   * Get Public Key from Did.
+   * Assumes Key Type = 0
+   *
+   * @param {string} did DID
+   * @param {number} typ Public Key type
+   * @returns {string} Actual Key
+   */
+  async getKey (did, typ = 0) {
+    return this.dids.getActualDidKey(this.exec, this.keypair, did, typ)
   }
 
   /**
@@ -378,89 +393,103 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {number} typ Public Key type
    * @returns {string} Actual Key
    */
-  async getActualDidKeyType(did, typ) {
-    return this.dids.getActualDidKeyType(this.exec, did, typ);
+  async getActualDidKeyType (did, typ) {
+    return this.dids.getActualDidKeyType(this.exec, this.keypair, did, typ)
   }
 
   /**
-   * Retrieves the Hash of a Did Document for a DID
+   * Get Public Key of specific type from Did.
+   *
+   * @param {string} did DID
+   * @param {number} typ Public Key type
+   * @returns {string} Actual Key
+   */
+  async getKeyType (did, typ) {
+    return this.dids.getActualDidKeyType(this.exec, this.keypair, did, typ)
+  }
+
+  /**
+   * Retrieves the Hash of a Storage Address for a DID
    *
    * @param {string} did DID
    * @returns {string} hash in Base64 format
    */
-  async getDidDocHash(did) {
-    return this.dids.getDidDocHash(this.exec, did);
+  async getStorageAddressHash (did) {
+    return this.dids.getStorageAddressHash(this.exec, did)
   }
 
   /**
-   * Adds a CID.
-   * DID to assign the CID. By default is Null and the CID
+   * Adds a Certificate.
+   * DID to assign the CID. By default is Null and the Certificate ID
    * will be assigned to the DID of the sender transaction account
    *
    * @param {string} cid CID
+   * @param {string} title Certicate's title
+   * @param {string} urlCertificate Certificate's URL
+   * @param {string} urlImage Certificate's URL image
+   * @param {string} cidType Certificate's type
    * @param {string} did DID to assign the new CID (Either null or Must exists)
-   * @param {number} max_hids DID to assign the new CID (Must exists)
    * @returns {Promise} of transaction
    */
-  async addCid(cid, did = null, max_hids = 0) {
-    return this.dids.addCid(this.exec, this.keypair, cid, did, max_hids);
+  async addCertificate (cid, title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
+    return this.dids.addCertificate(this.exec, this.keypair, cid, title, urlCertificate, urlImage, cidType, did)
   }
 
   /**
-   * Removes a CID.
-   * DID of the CIDs owner. By default is Null and the CID
+   * Revokes a Certificate.
+   * DID of the Certificate owner. By default is Null and the CID
    * must be assigned to the DID of the sender transaction account
    *
    * @param {string} cid CID
    * @param {string} did DID of the CIDs owner if providede
    * @returns {Promise} of transaction
    */
-  async deleteCid(cid, did = null) {
-    return this.dids.deleteCid(this.exec, this.keypair, cid, did);
+  async revokeCertificate (cid, did = null) {
+    return this.dids.revokeCertificate(this.exec, this.keypair, cid, did)
   }
 
   /**
-   * Get all CIDs.
-   * Get the whole CIDs collection, including deleted.
+   * Get all Certificates.
+   * Get the whole Certificates collection, including revoked.
    *
-   * @returns {Array} array of CIDs
+   * @returns {Array} array of Certificates
    */
-  async getCIDs() {
-    return this.dids.getCIDs(this.exec);
+  async getCertificates () {
+    return this.dids.getCertificates(this.exec)
   }
 
   /**
-   * Get all valid CIDs.
-   * Get all CIDs that are not deleted.
+   * Get all valid Certificates.
+   * Get all Certificates that are not revoked.
    *
-   * @returns {Array} array of CIDs
+   * @returns {Array} array of Certificates
    */
-  async getValidCIDs() {
-    return this.dids.getValidCIDs(this.exec);
+  async getValidCertificates () {
+    return this.dids.getValidCertificates(this.exec)
   }
 
   /**
-   * Get CID by key.
-   * Get CID data is key exists, else return null.
+   * Get Certificate by key.
+   * Get Certificate data if key exists, else return null.
    * Because is an ordered array, we use a binary search
    *
-   * @param {string} cid CID
+   * @param {string} cid Certificate ID
    * @returns {string} CID struct or null
    */
-  async getCIDByKey(cid) {
-    return this.dids.getCIDByKey(this.exec, cid);
+  async getCertificateByKey (cid) {
+    return this.dids.getCertificateByKey(this.exec, cid)
   }
 
   /**
-   * Get all valid CIDs that belongs to a DID.
-   * Get a collections of CID data that belongs to a DID.
+   * Get all valid Certificates that belongs to a DID.
+   * Get a collections of Certificate data that belongs to a DID.
    * (Can be empty)
    *
    * @param {string} did DID to search
    * @returns {object} CID array
    */
-  async getCIDsByDID(did) {
-    return this.dids.getCIDsByDID(this.exec, did);
+  async getCertificatesByDID (did) {
+    return this.dids.getCertificatesByDID(this.exec, did)
   }
 
   /**
@@ -549,17 +578,42 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {number} cost Cost to be burned by process node
    * @returns {Promise} of transaction
    */
-  async setTokenAndCostForProcess(tokenid, cost) {
-    return this.process.setTokenAndCostForProcess(this.exec, this.keypair, tokenid, cost);
+  async setTokenAndCostForProcess (tokenid, cost) {
+    const tokenIdAndCost = {
+      startProcess: [tokenid, cost],
+      startSubprocess: [tokenid, cost],
+      startStep: [tokenid, cost],
+      addDocument: [tokenid, cost],
+      addAttachment: [tokenid, cost],
+      pathTo: [tokenid, cost],
+      getFullProcessTree: [tokenid, cost],
+      revokeNode: [tokenid, cost]
+    }
+    return this.setTokensAndCosts(tokenIdAndCost)
   }
 
   /**
-   * Get the Token id and cost of process data
+   * Set the same Token ID and cost for DIDs and CIDs.
    *
+   * @param {number} tokenid Token's Id
+   * @param {number} cost Cost to be burned by process node
    * @returns {Promise} of transaction
    */
-  async getTokenIdAndCostProcessData() {
-    return this.process.getTokenIdAndCostProcessData(this.exec);
+  async setTokenAndCostForDIDsAndCIDs (tokenid, cost) {
+    const tokenIdAndCost = {
+      registerDid: [tokenid, cost],
+      setStorageAddress: [tokenid, cost],
+      setKey: [tokenid, cost],
+      putHash: [tokenid, cost],
+      changeLegalNameOrTaxId: [tokenid, cost],
+      updateInfo: [tokenid, cost],
+      changeDidOwner: [tokenid, cost],
+      revokeHash: [tokenid, cost],
+      removeDid: [tokenid, cost],
+      addCertificate: [tokenid, cost],
+      revokeCertificate: [tokenid, cost]
+    }
+    return this.setTokensAndCosts(tokenIdAndCost)
   }
 
   /**
@@ -572,8 +626,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} hash Process node hash
    * @returns {Promise} of transaction
    */
-  async revoke(hash) {
-    return this.process.revoke(this.exec, this.keypair, hash);
+  async revokeNode (hash) {
+    return this.process.revoke(this.exec, this.keypair, hash)
   }
 
   /**
@@ -583,7 +637,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @returns {Promise} of transaction
    */
   async getProcessNode(hash) {
-    return this.process.getProcessNode(this.exec, hash);
+    return this.process.getProcessNode(this.exec, hash)
   }
 
   /**
@@ -634,12 +688,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {number} minBalance The minimum balance.
    * @returns {Promise} of transaction
    */
-  async createToken(id, admin, minBalance) {
-    return this.tokens.createToken(this.exec, this.keypair, id, admin, minBalance);
-  }
-
-  async createNewToken(id, admin, minBalance) {
-    return this.tokens.createNewToken(this.exec, this.keypair, id, admin, minBalance);
+  async createToken (id, admin, minBalance = 0) {
+    return this.tokens.createToken(this.exec, this.keypair, id, admin, minBalance)
   }
 
   /**
@@ -1063,8 +1113,50 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {number} amount The amount of tokens to transfer.
    * @returns {Promise} of transaction
    */
-  async transferTokenApproval(id, owner, destination, amount) {
-    return this.tokens.transferTokenApproval(this.exec, this.keypair, id, owner, destination, amount);
+  async transferTokenApproval (id, owner, destination, amount) {
+    return this.tokens.transferTokenApproval(this.exec, this.keypair, id, owner, destination, amount)
+  }
+
+  /**
+   * Set tokens ids and costs for transactions.
+   * Origin must be root.
+   *
+   * @param {object} tokenAndCost The set of tokens ids and costs for transactions. 
+   * @returns {Promise} of transaction
+   */
+  async setTokensAndCosts (tokenAndCost) {
+    const tokenIdAndCost = {
+      register_did: tokenAndCost.registerDid ? tokenAndCost.registerDid : [0, 0],
+      set_storage_address: tokenAndCost.setStorageAddress ? tokenAndCost.setStorageAddress : [0, 0],
+      add_organization: tokenAndCost.registerDid ? tokenAndCost.registerDid : [0, 0],
+      set_key: tokenAndCost.setKey ? tokenAndCost.setKey : [0, 0],
+      put_hash: tokenAndCost.putHash ? tokenAndCost.putHash : [0, 0],
+      change_legal_name_or_tax_id: tokenAndCost.changeLegalNameOrTaxId ? tokenAndCost.changeLegalNameOrTaxId : [0, 0],
+      update_info: tokenAndCost.updateInfo ? tokenAndCost.updateInfo : [0, 0],
+      change_did_owner: tokenAndCost.changeDidOwner ? tokenAndCost.changeDidOwner : [0, 0],
+      revoke_hash: tokenAndCost.revokeHash ? tokenAndCost.revokeHash : [0, 0],
+      remove_did: tokenAndCost.removeDid ? tokenAndCost.removeDid : [0, 0],
+      add_certificate: tokenAndCost.addCertificate ? tokenAndCost.addCertificate : [0, 0],
+      revoke_certificate: tokenAndCost.revokeCertificate ? tokenAndCost.revokeCertificate : [0, 0],
+      start_process: tokenAndCost.startProcess ? tokenAndCost.startProcess : [0, 0],
+      start_subprocess: tokenAndCost.startSubprocess ? tokenAndCost.startSubprocess : [0, 0],
+      start_step: tokenAndCost.startStep ? tokenAndCost.startStep : [0, 0],
+      add_document: tokenAndCost.addDocument ? tokenAndCost.addDocument : [0, 0],
+      add_attachment: tokenAndCost.addAttachment ? tokenAndCost.addAttachment : [0, 0],
+      path_to: tokenAndCost.pathTo ? tokenAndCost.pathTo : [0, 0],
+      get_full_process_tree: tokenAndCost.getFullProcessTree ? tokenAndCost.getFullProcessTree : [0, 0],
+      revoke: tokenAndCost.revokeNode ? tokenAndCost.revokeNode : [0, 0]
+    }
+    return this.tokens.setTokensAndCosts(this.exec, this.keypair, tokenIdAndCost)
+  }
+
+  /**
+   * Get the Token id and cost of all transactions
+   *
+   * @returns {Promise} of transaction
+   */
+  async getTokenIdAndCosts () {
+    return this.tokens.getTokenIdAndCosts(this.exec)
   }
 
   /**

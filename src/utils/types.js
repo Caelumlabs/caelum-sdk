@@ -11,15 +11,15 @@ module.exports = {
       c: 'Vec<u8>',
       z: 'Vec<u8>',
       q: 'Vec<u8>',
-      i: 'u32',
+      i: 'u32'
     },
     IdSpaceReleases: {
       _enum: [
         'V1_0_0',
-        'V2_0_0',
-      ],
+        'V2_0_0'
+      ]
     },
-    CID: {
+    Certificate: {
       // Release of this CID template.
       release: 'IdSpaceReleases',
       // Hash of the CID template.
@@ -28,36 +28,42 @@ module.exports = {
       owner: 'AccountId',
       // Owner's DID.
       did_owner: 'Vec<u8>',
-      // Maximum HIDs allow to issue based on this CID.
-      max_hids_issue: 'u64',
+      // Certificate title
+      title: 'Vec<u8>',
+      // Certificate's URL
+      url_certificate: 'Vec<u8>',
+      // Certificate's image URL
+      url_image: 'Vec<u8>',
+      // Certificates type
+      cid_type: 'Vec<u8>',
       // Total HIDs issued so far.
       total_hids_issued: 'u64',
-      // Date when the template CID was created.
-      block_created: 'BlockNumber',
-      // Block when this template CID ws created.
+      // Block when this template CID was created.
       block_valid_from: 'BlockNumber',
       // Block when this template CID was invalidated. (0 means that it still valid).
-      block_valid_to: 'BlockNumber',
+      block_valid_to: 'BlockNumber'
     },
     PublicKey: {
       release: 'IdSpaceReleases',
       pub_key: 'Vec<u8>',
       block_valid_from: 'BlockNumber',
-      block_valid_to: 'BlockNumber',
+      block_valid_to: 'BlockNumber'
     },
     PublicKeyType: {
       release: 'IdSpaceReleases',
       pub_key_type: 'u16',
       pub_keys: 'Vec<PublicKey>',
       block_valid_from: 'BlockNumber',
-      block_valid_to: 'BlockNumber',
+      block_valid_to: 'BlockNumber'
     },
     Credential: {
       release: 'IdSpaceReleases',
-      credential: 'Vec<u8>',
-      accumulator: 'Accumulator',
+      did: 'Vec<u8>',
+      cid: 'Vec<u8>',
+      cid_type: 'Vec<u8>',
+      path: 'Option<Vec<u8>>',
       block_valid_from: 'BlockNumber',
-      block_valid_to: 'BlockNumber',
+      block_valid_to: 'BlockNumber'
     },
     DIDInfo: {
       release: 'IdSpaceReleases',
@@ -68,7 +74,7 @@ module.exports = {
       country_code: 'Option<Vec<u8>>',
       phone_number: 'Option<Vec<u8>>',
       website: 'Option<Vec<u8>>',
-      endpoint: 'Option<Vec<u8>>',
+      endpoint: 'Option<Vec<u8>>'
     },
     DIDData: {
       release: 'IdSpaceReleases',
@@ -82,14 +88,37 @@ module.exports = {
       legal_name: 'Vec<u8>',
       tax_id: 'Vec<u8>',
       did_doc: 'Vec<u8>',
-      credentials: 'Vec<Credential>',
+      credentials: 'Option<Vec<Vec<u8>>>',
+      accumulator: 'Option<Accumulator>',
       info: 'DIDInfo',
       block_valid_from: 'BlockNumber',
-      block_valid_to: 'BlockNumber',
+      block_valid_to: 'BlockNumber'
+    },
+    TokenIdAndCost: {
+      register_did: '(AssetId, u64)',
+      set_storage_address: '(AssetId, u64)',
+      add_organization: '(AssetId, u64)',
+      set_key: '(AssetId, u64)',
+      put_hash: '(AssetId, u64)',
+      change_legal_name_or_tax_id: '(AssetId, u64)',
+      update_info: '(AssetId, u64)',
+      change_did_owner: '(AssetId, u64)',
+      revoke_hash: '(AssetId, u64)',
+      remove_did: '(AssetId, u64)',
+      add_certificate: '(AssetId, u64)',
+      revoke_certificate: '(AssetId, u64)',
+      start_process: '(AssetId, u64)',
+      start_subprocess: '(AssetId, u64)',
+      start_step: '(AssetId, u64)',
+      add_document: '(AssetId, u64)',
+      add_attachment: '(AssetId, u64)',
+      path_to: '(AssetId, u64)',
+      get_full_process_tree: '(AssetId, u64)',
+      revoke: '(AssetId, u64)'
     },
     NftClassId: 'Vec<u8>',
     NftInstanceId: 'Vec<u8>',
-    NftClassDetails: {
+    NftClassDetails:  {
       owner: 'AccountId',
       issuer: 'AccountId',
       admin: 'AccountId',
@@ -99,7 +128,7 @@ module.exports = {
       instances: 'u32',
       instance_metadatas: 'u32',
       attributes: 'u32',
-      is_frozen: 'bool',
+      is_frozen: 'bool'
     },
     NodeType: {
       _enum: [
@@ -108,8 +137,8 @@ module.exports = {
         'Step',
         'Document',
         'Attachment',
-        'None',
-      ],
+        'None'
+      ]
     },
     ProcessNode: {
       did: 'Vec<u8>',
@@ -118,14 +147,14 @@ module.exports = {
       parent: 'Option<Vec<u8>>',
       children: 'Option<Vec<Vec<u8>>>',
       created_block: 'BlockNumber',
-      valid_until: 'BlockNumber',
+      valid_until: 'BlockNumber'
     },
     SuspensionJudgement: {
       _enum: [
         'Rebid',
         'Reject',
-        'Approve',
-      ],
-    },
-  },
-};
+        'Approve'
+      ]
+    }
+  }
+}
