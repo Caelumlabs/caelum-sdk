@@ -329,16 +329,22 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
-   * Get Public Key from Did.
+   * Get DID Data.
    *
    * @param {string} did DID
    * @returns {Promise} of Transaction
    */
-  async getDidData(did) {
-    const data = await this.dids.getDidData(this.exec, did);
-    data.legal_name = hexToString(data.legal_name);
-    data.tax_id = hexToString(data.tax_id);
-    return data;
+  async getDidData (did) {
+    return this.dids.getDidData(this.exec, did)
+  }
+
+  /**
+   * Get all DID Data.
+   *
+   * @returns {Promise} of Transaction
+   */
+  async getAllDidData () {
+    return this.dids.getAllDidData(this.exec)
   }
 
   /**

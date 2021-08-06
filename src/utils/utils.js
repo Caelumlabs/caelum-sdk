@@ -49,9 +49,18 @@ class Utils {
     }
     const result = str.slice(2).match(pattern);
     if (result.length !== str.length - 2) {
-      return false;
+      return false
     }
-    return true;
+    return true
+  }
+
+  static decimalToHex(d, padding) {
+    let hex = Number(d).toString(16)
+    padding = typeof (padding) === 'undefined' || padding === null ? padding = 2 : padding
+    while (hex.length < padding) {
+        hex = '0' + hex
+    }
+    return hex
   }
 }
 
