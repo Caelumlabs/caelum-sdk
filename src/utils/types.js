@@ -61,7 +61,7 @@ module.exports = {
       did: 'Vec<u8>',
       cid: 'Vec<u8>',
       cid_type: 'Vec<u8>',
-      path: 'Option<Vec<u8>>',
+      path: 'Option<Vec<Vec<u8>>>',
       is_frozen: 'bool',
       block_valid_from: 'BlockNumber',
       block_valid_to: 'BlockNumber'
