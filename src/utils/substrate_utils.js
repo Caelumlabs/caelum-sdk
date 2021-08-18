@@ -25,9 +25,42 @@ class Utils {
    * @param {string} str source
    * @returns {object} UTF8 Array
    */
-  static toUTF8Array(str) {
-    const buffer = Buffer.from(str, 'utf8');
-    return Array.prototype.slice.call(buffer, 0);
+  static toUTF8Array (str) {
+    const buffer = Buffer.from(str, 'utf8')
+    return Array.prototype.slice.call(buffer, 0)
+  }
+
+  /**
+   * Verify correct hex string
+   *
+   * @param {string} str source
+   * @returns {bool} True if string is correct 
+   */
+  static verifyHexString (str) {
+    let pattern = null
+    if (str.slice(0, 2) === '0X') {
+      pattern = /[A-F0-9]/gi
+    } else {
+      if (str.slice(0, 2) === '0x') {
+        pattern = /[a-f0-9]/gi
+      } else {
+        return false
+      }
+    }
+    const result = str.slice(2).match(pattern)
+    if (result.length !== str.length - 2) {
+      return false
+    }
+    return true
+  }
+
+  static decimalToHex(d, padding) {
+    let hex = Number(d).toString(16)
+    padding = typeof (padding) === 'undefined' || padding === null ? padding = 2 : padding
+    while (hex.length < padding) {
+        hex = '0' + hex
+    }
+    return hex
   }
 }
 
