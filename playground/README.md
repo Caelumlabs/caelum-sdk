@@ -1,8 +1,23 @@
 # Playground
 
-Load Informationon about a DID
+First you need to setup the basic token for an Ecosystem
+
 ```bash
-# node load <DID>
+cp .env.example .env
+export DEBUG="did:*"
+```
+
+Edit .env and change the name of the token and the organization you want to register.
+
+```bash
+node 1.setup.js
+```
+
+Edit .env and save the mnemonic for Admin as TOKEN_ADMIN
+Now check everything is deployed to the Blockchain.
+
+```bash
+node 2.check.js
 ```
 
 ## Root

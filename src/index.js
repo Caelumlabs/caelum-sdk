@@ -35,27 +35,23 @@ module.exports = class Caelum {
     return state;
   }
 
-  async registerToken(mnemonic, tokenId, tokenName, tokenSymbol, tokenAdmin) {
-    // Create Admin.
-    const admin = this.blockchain.setKeyring(mnemonic);
-    await this.blockchain.transferTokens(tokenAdmin, 3000000000000000);
-
-    // Create a new token.
-    await this.blockchain.createToken(tokenId, admin, 100);
-    await this.blockchain.setTokenMetadata(tokenId, tokenName, tokenSymbol, 0);
-    await this.blockchain.transferTokenOwnership(tokenId, tokenAdmin);
-  }
-
   async getTokenDetails(tokenId) {
     const tokenDetails = await this.blockchain.getTokenDetails(tokenId);
     return tokenDetails;
   }
 
+  async transferTokens(seed, tokenId, amount, toAddr) {
+    await this.blockchain.transferToken(tokenId, toAddr, amount);
+  }
+
+  async getTokenBalance(tokenId, addr) {
+    const tokenAccountData = await this.blockchain.getAccountTokenData(tokenId, addr);
+    return tokenAccountData.balance;
+  }
+
   async getOrganizationFromSeed(seed) {
-    this.blockchain.setKeyring(seed);
-    const did = await this.blockchain.getDidFromOwner();
-    const org = new Organization(this.blockchain, did);
-    await org.getData();
+    const org = new Organization(this.blockchain);
+    await org.loadFromSeed(seed);
     return org;
   }
 
@@ -63,6 +59,11 @@ module.exports = class Caelum {
     const org = new Organization(this.blockchain, did);
     await org.getData();
     return org;
+  }
+
+  async setEcosystemCosts(seed, costs) {
+    this.blockchain.setKeyring(seed);
+    await this.blockchain.setTokensAndCosts(costs);
   }
 
   /**

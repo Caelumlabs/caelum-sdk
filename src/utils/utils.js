@@ -39,7 +39,7 @@ class Utils {
   static verifyHexString(str) {
     let pattern = null;
     if (str.slice(0, 2) === '0X') {
-      pattern = /[A-F0-9]/gi
+      pattern = /[A-F0-9]/gi;
     } else {
       if (str.slice(0, 2) === '0x') {
         pattern = /[a-f0-9]/gi

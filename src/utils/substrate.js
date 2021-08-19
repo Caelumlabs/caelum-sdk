@@ -294,7 +294,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
     if (info.phoneNumber === undefined) { info.phoneNumber = null; }
     if (info.website === undefined) { info.website = null; }
     if (info.endpoint === undefined) { info.endpoint = null; }
-    return this.dids.changeInfo(this.exec,
+    return this.dids.updateInfo(this.exec,
       this.keypair,
       did,
       info.name,
@@ -1130,11 +1130,11 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {object} tokenAndCost The set of tokens ids and costs for transactions. 
    * @returns {Promise} of transaction
    */
-  async setTokensAndCosts (tokenAndCost) {
+  async setTokensAndCosts(tokenAndCost) {
     const tokenIdAndCost = {
       register_did: tokenAndCost.registerDid ? tokenAndCost.registerDid : [0, 0],
       set_storage_address: tokenAndCost.setStorageAddress ? tokenAndCost.setStorageAddress : [0, 0],
-      add_organization: tokenAndCost.registerDid ? tokenAndCost.registerDid : [0, 0],
+      add_organization: tokenAndCost.addOrganization? tokenAndCost.addOrganization : [0, 0],
       set_key: tokenAndCost.setKey ? tokenAndCost.setKey : [0, 0],
       put_hash: tokenAndCost.putHash ? tokenAndCost.putHash : [0, 0],
       change_legal_name_or_tax_id: tokenAndCost.changeLegalNameOrTaxId ? tokenAndCost.changeLegalNameOrTaxId : [0, 0],
