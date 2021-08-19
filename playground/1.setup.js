@@ -37,12 +37,12 @@ const init = async () => {
     addDocument: [process.env.TOKEN_ID, 1],
     addAttachment: [process.env.TOKEN_ID, 1],
   });
-
   // Disconnect.
   await caelum.disconnect();
 };
 
 /*
+ balance: 100, isFrozen: false, isSufficient: true }
 * Main
 */
 const main = async () => {

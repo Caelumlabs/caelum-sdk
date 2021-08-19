@@ -1,4 +1,5 @@
 const debug = require('debug')('did:debug:org');
+const { hexToString } = require('@polkadot/util');
 
 /**
  * Schema.org: Organization.
@@ -13,7 +14,6 @@ module.exports = class Organization {
     this.seed = '';
     this.keypair = {};
     this.info = {};
-    this.data = false;
     this.blockchain = blockchain;
   }
 
@@ -27,7 +27,7 @@ module.exports = class Organization {
 
   async registerToken(tokenId, tokenName, tokenSymbol, amount) {
     // Create a new token.
-    await this.blockchain.createToken(tokenId, this.keypair.address, 100);
+    await this.blockchain.createToken(tokenId, this.keypair.address, 0);
     await this.blockchain.setTokenMetadata(tokenId, tokenName, tokenSymbol, 0);
     await this.blockchain.transferTokenOwnership(tokenId, this.keypair.address);
 
@@ -50,17 +50,29 @@ module.exports = class Organization {
     return newOrg;
   }
 
-  async updateInformation(name, address, postalCode, city, countryCode, website, endpoint) {
+  async updateInformation(name, address, postalCode, city, countryCode, phoneNumber, website, endpoint) {
     this.blockchain.setKeyring(this.seed);
+    const tokenAccountData = await this.blockchain.getAccountTokenData(1, this.keypair.address);
+    console.log(tokenAccountData);
     this.info = {
-      name, address, postalCode, city, countryCode, website, endpoint,
+      name, address, postalCode, city, countryCode, website, endpoint, phoneNumber
     };
-	console.log(this.did, this.info);
     await this.blockchain.changeInfo(this.did, this.info);
   }
 
   async getData() {
-    this.data = await this.blockchain.getDidData(this.did);
-    return this.data;
+    const data = await this.blockchain.getDidData(this.did);
+    this.info.legalName = hexToString(data.legal_name);
+    this.info.taxId = hexToString(data.tax_id);
+    this.info.name = (data.info.name) ? hexToString(data.info.name) : '';
+    this.info.address = (data.info.address) ? hexToString(data.info.address) : '';
+    this.info.postalCode = (data.info.address) ? hexToString(data.info.postal_code) : '';
+    this.info.city = (data.info.city) ? hexToString(data.info.city) : '';
+    this.info.countryCode = (data.info.country_code) ? hexToString(data.info.country_code) : '';
+    this.info.phoneNumber = (data.info.phone_number) ? hexToString(data.info.phone_number) : '';
+    this.info.website = (data.info.website) ? hexToString(data.info.website) : '';
+    this.info.endpoint = (data.info.endpoint) ? hexToString(data.info.endpoint) : '';
+
+    return this.info;
   }
 };

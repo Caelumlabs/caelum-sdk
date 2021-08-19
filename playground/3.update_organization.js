@@ -16,12 +16,12 @@ const init = async () => {
     process.env.ORG_POSTAL,
     process.env.ORG_CITY,
     process.env.ORG_COUNTRY,
+    process.env.ORG_PHONE,
     process.env.ORG_URL,
     process.env.ORG_ENDPOINT,
   );
 
-  const information = await orgAdmin.getData(orgAdmin.did);
-  console.log(information);
+  console.log(await orgAdmin.getData());
 
   const balance = await caelum.getTokenBalance(process.env.TOKEN_ID, orgAdmin.keypair.address);
   console.log(`Token = ${balance} ${process.env.TOKEN_SYMBOL}`);
