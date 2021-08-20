@@ -25,7 +25,7 @@ module.exports = class Organization {
     this.did = await this.blockchain.getDidFromOwner();
     this.seed = seed;
     this.keypair = this.blockchain.getKeyring(seed);
-    await this.getData();
+	if (this.did) await this.getData();
   }
 
   async registerToken(tokenId, tokenName, tokenSymbol, amount) {
@@ -47,7 +47,7 @@ module.exports = class Organization {
     debug(`Mnemonic = ${keys.mnemonic}`);
 
 	console.log(`Transfer tokens to ${keys.address}`);
-    await this.blockchain.transferTokens(keys.address, 100000000000);
+    await this.blockchain.transferTokens(keys.address, 100000);
     await this.blockchain.transferToken(tokenId, keys.address, amount);
     const newOrg = new Organization(this.blockchain, did);
     newOrg.keys = keys;
@@ -79,7 +79,7 @@ module.exports = class Organization {
     const signer = await this.blockchain.getKey(this.did);
     this.signer = { publicKey: u8aToString(signer).toString() };
     const gasdata = await this.blockchain.addrState(this.owner);
-    this.info.gas = gasdata.balance.free.toNumber();
+    this.info.gas = gasdata.balance.free.toHuman();
     this.info.did = `did:caelum:${this.did}`;
     this.info.legalName = hexToString(data.legal_name);
     this.info.taxId = hexToString(data.tax_id);
@@ -91,8 +91,8 @@ module.exports = class Organization {
     this.info.phoneNumber = (data.info.phone_number) ? hexToString(data.info.phone_number) : '';
     this.info.website = (data.info.website) ? hexToString(data.info.website) : '';
     this.info.endpoint = (data.info.endpoint) ? hexToString(data.info.endpoint) : '';
-
     this.certificates = {};
+	  console.log(this.info);
     const certificates = await this.blockchain.getCertificatesByDID(this.did);
     for (let i = 0; i < certificates.length; i += 1) {
       const certificateId = hexToString(certificates[i].certificate);
