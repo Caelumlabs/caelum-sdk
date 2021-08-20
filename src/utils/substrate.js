@@ -499,6 +499,26 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
+   * Get a Credential/Hash.
+   *
+   * @param {string} hash hash to read.
+   * @returns {object} Credential/Hash
+   */
+  async getHash (hash) {
+    return this.dids.getHash(this.exec, hash)
+  }
+
+  /**
+   * Get all Credentials/Hashes of a DID.
+   *
+   * @param {string} did DID to read.
+   * @returns {Array} array of Credentials/Hashes
+   */
+  async getAllHashesOfDid (did) {
+    return this.dids.getHash(this.exec, did)
+  }
+  
+  /**
    * Starts a Process.
    * This must be the first call when a recipe o process is being executed
    * all other execution subprocesses, steps or documents depends on it
