@@ -213,8 +213,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {object} storageAddress Arweave storage address (Vec<u8>)
    * @returns {Promise} Result of the transaction
    */
-  async setStorageAddress (did, storageAddress) {
-    return this.dids.setStorageAddress(this.exec, this.keypair, did, storageAddress)
+  async setStorageAddress(did, storageAddress) {
+    return this.dids.setStorageAddress(this.exec, this.keypair, did, storageAddress);
   }
 
   /**
@@ -228,8 +228,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} did DID
    * @returns {Promise} Result of the transaction
    */
-  async setKey (pubKey, did = null, typ = 0) {
-    return this.dids.setKey(this.exec, this.keypair, did, pubKey, typ)
+  async setKey(pubKey, did = null, typ = 0) {
+    return this.dids.setKey(this.exec, this.keypair, did, pubKey, typ);
   }
 
   /**
@@ -239,8 +239,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} newOwner New owner's Account (AccountId)
    * @returns {Promise} Result of the transaction
    */
-  async changeOwner (did, newOwner) {
-    return this.dids.changeOwner(this.exec, this.keypair, did, newOwner)
+  async changeOwner(did, newOwner) {
+    return this.dids.changeOwner(this.exec, this.keypair, did, newOwner);
   }
 
   /**

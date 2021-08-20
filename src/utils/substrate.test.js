@@ -1,4 +1,4 @@
-/* eslint no-use-before-define: 0 */
+/* eslint-disable */
 'use strict'
 const chai = require('chai')
 const util = require('util')
@@ -667,4 +667,3 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     expect(blockchain).to.not.be.undefined
   })
 })
-/* eslint no-use-before-define: 2 */

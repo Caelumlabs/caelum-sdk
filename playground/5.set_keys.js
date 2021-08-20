@@ -11,9 +11,9 @@ const init = async () => {
 
   // Transfer Ownership.
   const newKeys = await caelum.newCertificateKeys();
-  console.log(newKeys);
-  // console.log(`Org admin Addr: ${newKeys.address}`);
-  await orgAdmin.setKeys(newKeys.Organization.keypair.public_key);
+  console.log(`Signer Private Key: ${newKeys.Organization.keypair.private_key}`);
+  console.log(`Signer Public Key: ${newKeys.Organization.keypair.public_key}`);
+  await orgAdmin.setSigner(newKeys.Organization.keypair);
 
   // Disconnect.
   await caelum.disconnect();

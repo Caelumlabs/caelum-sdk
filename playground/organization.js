@@ -9,6 +9,7 @@ const init = async () => {
   // Connect to organization.
   const orgAdmin = await caelum.getOrganizationFromDid(process.env.ORG_DID);
   console.log(orgAdmin.info);
+  console.log(orgAdmin.certificates);
   console.log(`Owner = ${orgAdmin.owner}`);
   console.log(`Signer = ${orgAdmin.signer.publicKey}`);
 

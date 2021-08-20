@@ -5535,7 +5535,7 @@
   "resolved" "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz"
   "version" "0.1.0"
 
-"zenroom@^2.2.0-b77c4de8":
-  "integrity" "sha512-NOMbIA4xaosYHgBLOmHXIIaQjEdgCJxAwfvqmXC3okkkaM6OtdJgXM7TYIDU8onz2baYun/eqbQJZ4PWWvPAVA=="
-  "resolved" "https://registry.npmjs.org/zenroom/-/zenroom-2.2.0.tgz"
-  "version" "2.2.0"
+"zenroom@2.2.0-ac5583a7":
+  "integrity" "sha512-pqu/P3ywnNr84bN4CGV19wUE1x/9k3u8S56BggTbSmuTbHctrUUtkCpPTUh2TpglW0IkSeqNVjI1BswNZok5sQ=="
+  "resolved" "https://registry.npmjs.org/zenroom/-/zenroom-2.2.0-ac5583a7.tgz"
+  "version" "2.2.0-ac5583a7"
