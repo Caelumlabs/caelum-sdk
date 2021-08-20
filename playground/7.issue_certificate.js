@@ -11,7 +11,7 @@ const init = async () => {
   const orgAdmin = await caelum.getOrganizationFromSeed(process.env.ORG_SEED);
   orgAdmin.updateSigner(process.env.SIGNER_PUBLICKEY, process.env.SIGNER_PRIVATEKEY);
 
-  // Transfer Ownership.
+  //Create certificate 
   const capability = orgAdmin.newAuthorisedCapability(
     '2156156215',
     1,
