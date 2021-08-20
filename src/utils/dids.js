@@ -437,7 +437,7 @@ module.exports = class DIDs {
       })
     return cids
   }
-  
+
   /**
    * Get a Credential/Hash.
    *
@@ -460,7 +460,7 @@ module.exports = class DIDs {
    * @param {string} did DID to read.
    * @returns {Array} array of Credentials/Hashes
    */
-  async getAllHashesOfDid (exec, did) {
+  async getAllHashesForDid (exec, did) {
     // Check if Certificate is wellformed
     if (Utils.verifyHexString(did) === false) {
       return false
@@ -470,10 +470,12 @@ module.exports = class DIDs {
     let hashes = []
     if (didData.credentials.isSome) {
       hashes = didData.credentials.unwrap().map(async (d) => {
-        return JSON.parse(await exec.api.query.idSpace.hashes(d))
+        const data = await exec.api.query.idSpace.hashes(d)
+        return { hash: d, data: data }
       })
     }
-    return hashes
+    hashes = await Promise.all(hashes)
+    return hashes.map((h) => { return { hash: u8aToHex(h.hash), data: JSON.parse(h.data) } })
   }
 
   /**
