@@ -437,6 +437,44 @@ module.exports = class DIDs {
       })
     return cids
   }
+  
+  /**
+   * Get a Credential/Hash.
+   *
+   * @param {object} exec Executor class.
+   * @param {string} hash hash to read.
+   * @returns {Array} array of Certificates
+   */
+  async getHash (exec, hash) {
+    // Check if Credential/Hash wellformed
+    if (Utils.verifyHexString(hash) === false) {
+      return false
+    }
+    return JSON.parse(await exec.api.query.idSpace.hashes(hash))
+  }
+
+  /**
+   * Get all Credentials/Hashes of a DID.
+   *
+   * @param {object} exec Executor class.
+   * @param {string} did DID to read.
+   * @returns {Array} array of Credentials/Hashes
+   */
+  async getAllHashesOfDid (exec, did) {
+    // Check if Certificate is wellformed
+    if (Utils.verifyHexString(did) === false) {
+      return false
+    }
+    const { internalDid } = this.structDid(did)
+    const didData = await exec.api.query.idSpace.didData(internalDid)
+    let hashes = []
+    if (didData.credentials.isSome) {
+      hashes = didData.credentials.unwrap().map(async (d) => {
+        return JSON.parse(await exec.api.query.idSpace.hashes(d))
+      })
+    }
+    return hashes
+  }
 
   /**
    * Destructure DID into its components as version.
