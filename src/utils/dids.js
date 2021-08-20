@@ -468,14 +468,13 @@ module.exports = class DIDs {
     const { internalDid } = this.structDid(did)
     const didData = await exec.api.query.idSpace.didData(internalDid)
     let hashes = []
-    if (didData.credentials.isSome) {
-      hashes = didData.credentials.unwrap().map(async (d) => {
-        const data = await exec.api.query.idSpace.hashes(d)
-        return { hash: d, data: data }
-      })
-    } else {
-      return []
+    if (didData.credentials.isNone) {
+      return hashes
     }
+    hashes = didData.credentials.unwrap().map(async (d) => {
+      const data = await exec.api.query.idSpace.hashes(d)
+      return { hash: d, data: data }
+    })
     hashes = await Promise.all(hashes)
     return hashes.map((h) => { return { hash: u8aToHex(h.hash), data: JSON.parse(h.data) } })
   }
