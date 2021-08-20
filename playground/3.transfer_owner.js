@@ -9,22 +9,14 @@ const init = async () => {
   // Connect to organization.
   const orgAdmin = await caelum.getOrganizationFromSeed(process.env.ORG_SEED);
 
-  // Update Information.
-  await orgAdmin.updateInformation(
-    process.env.ORG_NAME,
-    process.env.ORG_ADDRESS,
-    process.env.ORG_POSTAL,
-    process.env.ORG_CITY,
-    process.env.ORG_COUNTRY,
-    process.env.ORG_PHONE,
-    process.env.ORG_URL,
-    process.env.ORG_ENDPOINT,
-  );
-
-  console.log(await orgAdmin.getData());
+  // Transfer Ownership.
+  const newKeys = await caelum.newBlockchainKeys();
+  console.log(`Org admin Seed: ${newKeys.mnemonic}`);
+  console.log(`Org admin Addr: ${newKeys.address}`);
+  await orgAdmin.transferOwnership(newKeys, process.env.TOKEN_ID);
 
   const balance = await caelum.getTokenBalance(process.env.TOKEN_ID, orgAdmin.keypair.address);
-  console.log(`Token = ${balance} ${process.env.TOKEN_SYMBOL}`);
+  console.log(`Balance ${orgAdmin.keypair.address} = ${balance} ${process.env.TOKEN_SYMBOL}`);
 
   // Disconnect.
   await caelum.disconnect();

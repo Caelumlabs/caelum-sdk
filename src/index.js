@@ -1,6 +1,7 @@
 require('dotenv').config();
 const Organization = require('./lib/organization');
 const Blockchain = require('./utils/substrate');
+const W3C = require('./utils/zenroom')
 
 /**
  * Caelum main library
@@ -23,8 +24,13 @@ module.exports = class Caelum {
     await this.blockchain.disconnect();
   }
 
-  async newKeys() {
+  async newBlockchainKeys() {
     const keys = await this.blockchain.newKeys();
+    return keys;
+  }
+
+  async newCertificateKeys() {
+    const keys = await W3C.newKeys('Organization');
     return keys;
   }
 
