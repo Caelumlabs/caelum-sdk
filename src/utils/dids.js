@@ -473,6 +473,8 @@ module.exports = class DIDs {
         const data = await exec.api.query.idSpace.hashes(d)
         return { hash: d, data: data }
       })
+    } else {
+      return []
     }
     hashes = await Promise.all(hashes)
     return hashes.map((h) => { return { hash: u8aToHex(h.hash), data: JSON.parse(h.data) } })
