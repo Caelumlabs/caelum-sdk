@@ -92,7 +92,6 @@ module.exports = class Organization {
     this.info.website = (data.info.website) ? hexToString(data.info.website) : '';
     this.info.endpoint = (data.info.endpoint) ? hexToString(data.info.endpoint) : '';
     this.certificates = {};
-	  console.log(this.info);
     const certificates = await this.blockchain.getCertificatesByDID(this.did);
     for (let i = 0; i < certificates.length; i += 1) {
       const certificateId = hexToString(certificates[i].certificate);
