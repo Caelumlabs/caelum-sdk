@@ -1,6 +1,7 @@
 const debug = require('debug')('did:debug:org');
 const { hexToString, stringToHex, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
+const Crypto = require('../utils/crypto');
 
 const TOKENID = 1;
 
@@ -91,8 +92,8 @@ module.exports = class Organization {
     this.info.phoneNumber = (data.info.phone_number) ? hexToString(data.info.phone_number) : '';
     this.info.website = (data.info.website) ? hexToString(data.info.website) : '';
     this.info.endpoint = (data.info.endpoint) ? hexToString(data.info.endpoint) : '';
+    this.info.level = data.level;
     this.certificates = {};
-	  console.log(this.info);
     const certificates = await this.blockchain.getCertificatesByDID(this.did);
     for (let i = 0; i < certificates.length; i += 1) {
       const certificateId = hexToString(certificates[i].certificate);
@@ -119,10 +120,10 @@ module.exports = class Organization {
     // Transfer all gas to new addr.
     console.log('2. Move Gas');
     // console.log(await this.blockchain.getAccountTokenData(tokenId, this.keypair.address));
-    // await this.blockchain.transferAllTokens(newKeys.address);
+    await this.blockchain.transferAllTokens(newKeys.address);
 
     // Transfer all tokens to new addr.
-    const tokenAccountData = await this.blockchain.getAccountTokenData(tokenId, this.owner);
+    const tokenAccountData = await this.blockchain.getAccountTokenData(TOKENID, this.owner);
     console.log("3. Transfer Tokens to " + newKeys.address, tokenAccountData.balance);
     await this.blockchain.transferToken(TOKENID, newKeys.address, tokenAccountData.balance - 1);
 
@@ -218,13 +219,22 @@ module.exports = class Organization {
    * @param {object} credential The signed Verifiable credential
    */
   async verifyCredential(signedCredential) {
-	  console.log(this.signer);
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
-	  console.log(signedCredential.proof.jws, valid);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-	  console.log('Hash', hash);
 	const hashes = await this.blockchain.getAllHashesOfDid(this.did);
-	  console.log(hashes);
 	return valid;
   }
+
+  /*
+  async export (password) {
+    const keys = Crypto.encryptObj(password, this.keys)
+    const json = JSON.stringify({ did: this.did, keys: keys })
+    return json
+  }
+
+  async import (data, password) {
+    this.did = data.did
+    this.keys = Crypto.decryptObj(password, data.keys)
+  }
+  */
 };
