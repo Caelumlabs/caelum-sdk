@@ -7,7 +7,7 @@ const { hexToString } = require('@polkadot/util');
 const BlockchainInterface = require('./blockchain');
 const Executor = require('./executor');
 const DID = require('./dids');
-const Balance = require('./balance');
+const Gas = require('./gas');
 const Process = require('./process');
 const Tokens = require('./fungibles');
 const ClassNFTs = require('./classnfts');
@@ -26,7 +26,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
     // Initialize all needed classes
     this.exec = new Executor(server);
     this.dids = new DID();
-    this.balance = new Balance();
+    this.gas = new Gas();
     this.process = new Process();
     this.tokens = new Tokens();
     this.classNFTs = new ClassNFTs();
@@ -129,57 +129,49 @@ module.exports = class SubstrateLib extends BlockchainInterface {
 	return false;
   }
 
-  // The following functions deal with native blockchain tokens
-  // Gets and sets token balances
+  // The following functions deal with native blockchain gas tokens
+  // Gets and sets gas balances
 
   /**
-   * Balance of Tokens
+   * Balance of Gas
    *
    * @param {string} address Address to send tokens to
    * @returns {*} balance and nonce
    */
   async addrState(address = false) {
-    return this.balance.addrState(this.exec, this.keypair, address);
+    return this.gas.addrState(this.exec, this.keypair, address);
   }
 
   /**
-   * Transfer Tokens
+   * Transfer Gas
    *
-   * @param {string} addrTo Address to send tokens to
-   * @param {*} amount Amount of tokens
-   * @returns {Promise} of sending tokens
+   * @param {string} addrTo Address to send gas to
+   * @param {*} amount Amount of gas
+   * @returns {Promise} of sending gas
    */
-  async transferTokens(addrTo, amount) {
-    return this.balance.transferTokens(this.exec, this.keypair, addrTo, amount);
+  async transferGas(addrTo, amount) {
+    return this.gas.transferGas(this.exec, this.keypair, addrTo, amount);
   }
 
   /**
-   * Transfer Tokens
+   * Transfer Gas
    *
-   * @param {string} addrTo Address to send tokens to
-   * @param {*} amount Amount of tokens
-   * @returns {Promise} of sending tokens
+   * @param {string} addrTo Address to send gas to
+   * @param {*} amount Amount of gas
+   * @returns {Promise} of sending gas
    */
-  async transferTokensNoFees(addrTo, amount) {
-    return this.balance.transferTokensNoFees(this.exec, this.keypair, addrTo, amount);
+  async transferGasNoFees(addrTo, amount) {
+    return this.gas.transferGasNoFees(this.exec, this.keypair, addrTo, amount);
   }
 
   /**
-   * Transfer All Tokens
+   * Transfer All Gas
    *
-   * @param {string} addrTo Address to send tokens to
-   * @returns {Promise} of sending tokens
+   * @param {string} addrTo Address to send gas to
+   * @returns {Promise} of sending gas
    */
-  async transferAllTokens(addrTo) {
-    return this.balance.transferAllTokens(this.exec, this.keypair, addrTo);
-  }
-
-  /**
-   * Transfer All Tokens
-   *
-   */
-  async createOwnAdminToken(id, admin, minBalance) {
-    return this.tokens.createOwnAdminToken(this.exec, this.keypair, id, admin, minBalance);
+  async transferAllGas(addrTo) {
+    return this.gas.transferAllTokens(this.exec, this.keypair, addrTo);
   }
 
   // DID and CID functions
@@ -1789,6 +1781,27 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    */
   async getNFTAttribute(classid, instanceid, key) {
     return this.classNFTs.getNFTAttribute(this.exec, classid, instanceid, key);
+  }
+
+  /**
+   * Tranfers DID ownership and all Gas and tokens from sender's new owner account.
+   * Sender must be the owner of the token.
+   *
+   * Parameters:
+   * - `newOwner`: The account receiving the Gas and tokens. This must not be currently in use to identify an existing token.
+   * - `tokenId`: The token id of the tokens to be transferred.
+   *    If an account's balance is reduced below this, then it collapses to zero.
+   *
+   * @param {string} did DID to be transferred. Sender must be the owner. 
+   * @param {number} newOwner The new DID owner and receiver of the Gas and tokens. 
+   * @param {object} tokenId The token id to be transferred.
+   * @param {number} gasAmount The amount of gas to transfer. Defaults to 'all'.
+   * @param {number} tokenAmount The amounts of tokens to be transferred. Defaults to 'all'.
+   * @returns {Promise} of transaction
+   */
+
+  async transferDidOwnershipGasAndTokens (did, newOwner, tokenId, gasAmount = 'all', tokenAmount = 'all') {
+    return this.dids.transferDidOwnershipGasAndTokens(this.exec, this.keypair, did, newOwner, tokenId, gasAmount, tokenAmount)
   }
 
   /**

@@ -65,40 +65,40 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     expect(blockchain).not.be.undefined
   })
 
-  it('Should send Tokens from Alice to tempWallet', async () => {
+  it('Should send Gas from Alice to tempWallet', async () => {
     const amount1 = await blockchain.addrState(aliceAddr)
-    await blockchain.transferTokens(tempWallet.address, 3000000000000000)
+    await blockchain.transferGas(tempWallet.address, 3000000000000000)
     const amount2 = await blockchain.addrState(aliceAddr)
     expect(amount1).not.equal(amount2);
   })
 
-  it('Should send Tokens from Alice to Zelda', async () => {
+  it('Should send Gas from Alice to Zelda', async () => {
     const amount1 = await blockchain.addrState(aliceAddr)
-    await blockchain.transferTokens(blockchain.getAddress(zeldaMnemonic), 3000000000000000)
+    await blockchain.transferGas(blockchain.getAddress(zeldaMnemonic), 3000000000000000)
     const amount2 = await blockchain.addrState(aliceAddr)
     expect(amount1).not.equal(amount2)
   })
 
-  it('Should send Tokens from Alice to tempWallet without paying fee', async () => {
+  it('Should send Gas from Alice to tempWallet without paying fee', async () => {
     const amount1 = await blockchain.addrState(aliceAddr)
-    await blockchain.transferTokensNoFees(tempWallet.address, 3000)
+    await blockchain.transferGasNoFees(tempWallet.address, 3000)
     const amount2 = await blockchain.addrState(aliceAddr)
     expect(amount1).not.equal(amount2)
   })
 
-  it('Should send Tokens from Alice to tempWallet2 without paying fee', async () => {
+  it('Should send Gas from Alice to tempWallet2 without paying fee', async () => {
     const amount1 = await blockchain.addrState(aliceAddr)
-    await blockchain.transferTokensNoFees(tempWallet2.address, 3000000000000000)
+    await blockchain.transferGasNoFees(tempWallet2.address, 3000000000000000)
     const amount2 = await blockchain.addrState(aliceAddr)
     expect(amount1).not.equal(amount2)
   })
 
-  it('Should send Tokens from Alice to tempWallet3 and tempWallet4 without paying fee', async () => {
+  it('Should send Gas from Alice to tempWallet3 and tempWallet4 without paying fee', async () => {
     const amount1 = await blockchain.addrState(aliceAddr)
-    await blockchain.transferTokensNoFees(tempWallet3.address, 30000000)
+    await blockchain.transferGasNoFees(tempWallet3.address, 30000000)
     const amount2 = await blockchain.addrState(aliceAddr)
     expect(amount1).not.equal(amount2)
-    await blockchain.transferTokensNoFees(tempWallet4.address, 3000000000000000)
+    await blockchain.transferGasNoFees(tempWallet4.address, 3000000000000000)
     const amount3 = await blockchain.addrState(aliceAddr)
     expect(amount2).not.equal(amount3)
   })
