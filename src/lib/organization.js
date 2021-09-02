@@ -1,8 +1,8 @@
 const debug = require('debug')('did:debug:org');
+const axios = require('axios');
 const { hexToString, stringToHex, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
-const axios = require('axios');
-// const Crypto = require('../utils/crypto');
+const SDK = require('./sdk');
 
 const TOKENID = 1;
 
@@ -224,8 +224,8 @@ module.exports = class Organization {
    */
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
-    const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-    const hashes = await this.blockchain.getAllHashesOfDid(this.did);
+    // const hash = await this.blockchain.getHash(signedCredential.proof.jws);
+    // const hashes = await this.blockchain.getAllHashesOfDid(this.did);
     return valid;
   }
 
@@ -236,12 +236,18 @@ module.exports = class Organization {
         .then((result) => {
           // 1 - login/register to Tabit network (last param)
           const connectionString = `1-${result.data.sessionIdString}-${this.did}-1`;
-          resolve({ sessionId: result.data.sessionId, connectionString });
+          resolve({ sessionIdString: result.data.sessionIdString, connectionString });
         })
         .catch(() => {
           resolve(false);
         });
     });
+  }
+
+  async setSession(tokenApi, capability) {
+    console.log(this.info.did, tokenApi, this.info.endpoint, capability);
+    this.sdk = new SDK(this.caelum, this.info.did, tokenApi, this.info.endpoint, capability);
+    this.parameters = (capability === 'admin') ? await this.sdk.call('parameter', 'getAll') : false;
   }
 
   /*

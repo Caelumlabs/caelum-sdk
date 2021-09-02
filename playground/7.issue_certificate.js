@@ -1,4 +1,3 @@
-const {validateChars} = require('@polkadot/util-crypto/base58/validate');
 const Caelum = require('../src/index');
 
 // Main function.
@@ -11,7 +10,7 @@ const init = async () => {
   const orgAdmin = await caelum.getOrganizationFromSeed(process.env.ORG_SEED);
   orgAdmin.updateSigner(process.env.SIGNER_PUBLICKEY, process.env.SIGNER_PRIVATEKEY);
 
-  //Create certificate 
+  // Create certificate.
   const capability = orgAdmin.newAuthorisedCapability(
     '2156156215',
     1,
@@ -21,8 +20,6 @@ const init = async () => {
     0,
   );
 
-  // console.log(`Org admin Addr: ${newKeys.address}`);
-  // console.log(capability, orgAdmin.signer);
   const signedCredential = await orgAdmin.signCapability(capability, '1');
   console.log(signedCredential);
 
