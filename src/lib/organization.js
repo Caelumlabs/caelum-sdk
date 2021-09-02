@@ -231,7 +231,6 @@ module.exports = class Organization {
 
   async getSession(capability) {
     return new Promise((resolve) => {
-      console.log(`${this.info.endpoint}auth/session`);
       axios.post(`${this.info.endpoint}auth/session`, { capability })
         .then((result) => {
           // 1 - login/register to Tabit network (last param)
@@ -245,7 +244,6 @@ module.exports = class Organization {
   }
 
   async setSession(tokenApi, capability) {
-    console.log(this.info.did, tokenApi, this.info.endpoint, capability);
     this.sdk = new SDK(this.caelum, this.info.did, tokenApi, this.info.endpoint, capability);
     this.parameters = (capability === 'admin') ? await this.sdk.call('parameter', 'getAll') : false;
   }

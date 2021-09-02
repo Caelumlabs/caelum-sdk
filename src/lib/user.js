@@ -91,6 +91,8 @@ module.exports = class User {
 
   async claim(org, notId) {
     const credential = await org.sdk.call('auth', 'claim', { params: [notId] });
+	console.log(credential);
+	  return;
 
     this.credentials[credential.hashId] = {
       peerDid: credential.user.peerDid,
