@@ -514,8 +514,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} did DID to read.
    * @returns {Array} array of Credentials/Hashes
    */
-  async getAllHashesOfDid (did) {
-    return this.dids.getHash(this.exec, did)
+  async getAllHashesForDid (did) {
+    return await this.dids.getAllHashesForDid(this.exec, did)
   }
   
   /**

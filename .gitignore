@@ -10,6 +10,7 @@ package-lock.json
 uploads
 datatest
 docs
+playground/admin.json
 
 # Test data
 test/data/*.db
