@@ -13,6 +13,7 @@ const init = async () => {
 
   // Connect as root.
   const root = await caelum.getOrganizationFromSeed(process.env.ROOT_SEED);
+  console.log('Register DID');
   const newOrg = await root.registerOrganization(
     process.env.LEGAL_NAME,
     process.env.TAX_ID,

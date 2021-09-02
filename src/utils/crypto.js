@@ -232,7 +232,9 @@ module.exports = class Crypto {
     const verifier = new Keyring({ type: 'sr25519' });
     const pair = verifier.addFromAddress(publicKey);
     const keyPair = verifier.getPair(pair.address);
-    const isValid = keyPair.verify(message, signature);
+	  console.log('Message', message, signature);
+    const isValid = keyPair.verify(stringToU8a(message), signature);
+	console.log(isValid, signature)
     return isValid;
   }
 

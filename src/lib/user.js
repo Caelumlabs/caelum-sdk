@@ -1,8 +1,8 @@
 const axios = require('axios');
-const Storage = require('../utils/bigchaindb');
 const Blockchain = require('../utils/substrate');
 const Crypto = require('../utils/crypto');
 const SDK = require('./sdk');
+const W3C = require('../utils/zenroom');
 
 /**
  * User
@@ -28,6 +28,27 @@ module.exports = class User {
     return sdk;
   }
 
+  /*
+   * Sign a session
+   *
+   * @param {string} sessionIdString Session String ID
+   * @param {string} did Org. DID
+   * @param {string} peerDid Peer DID.
+   * @return {object} Signed VC for the session.
+   */
+  async signSession(sessionIdString, did, keys) {
+    const credential = {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential', 'Session'],
+      issuer: `did:peerdid:${keys.Organization.keypair.public_key}`,
+      credentialSubject: { did: `did:caelum:${did}`, sessionIdString },
+      issuanceDate: new Date().toISOString(),
+    };
+    const issuer = { Issuer: { keypair: keys.Organization.keypair , PublicKeyUrl: 'did:caelum' }};
+    const signedCredential = await W3C.signCredential(credential, issuer);
+    return signedCredential;
+  }
+
   /**
    * Register a new organization
    *
@@ -35,34 +56,23 @@ module.exports = class User {
    * @param {string} sessionId Session ID
    * @param {string} secretCode Secret Code
    */
-  async register(org, sessionId, secretCode) {
-    let signature;
+  async register(org, sessionIdString, secretCode) {
     return new Promise((resolve, reject) => {
       // Create new keys for the peerDID (connection ID)
       if (this.connections[org.did]) reject(new Error('organization already exists'));
       else {
         this.orgs[org.did] = org;
         this.connections[org.did] = {};
-        Blockchain.newKeys()
-          .then((governanceKey) => {
-            this.connections[org.did].peerDid = governanceKey.address;
-            this.connections[org.did].governance = governanceKey.mnemonic;
-            signature = Crypto.u8aToHex(Crypto.signMessage(sessionId, governanceKey.keyPair));
-            return Storage.getKeys(false);
+        this.caelum.newCertificateKeys()
+          .then((keys) => {
+            this.connections[org.did] = keys;
+            return this.signSession(sessionIdString, org.did, keys);
           })
-          .then((storageKey) => {
-            this.connections[org.did].storage = storageKey.mnemonic;
-
-            // Claim capacity from Idspace
-            return axios.put(`${org.endpoint}auth/session`, {
-              action: 'register',
-              peerDid: this.connections[org.did].peerDid,
-              sessionId,
-              secret: secretCode,
-              signature,
-              challenge: Crypto.hash(Crypto.random()).substring(2),
-            });
-          })
+          .then((signature) => axios.put(`${org.info.endpoint}auth/session`, {
+            action: 'register',
+            secret: secretCode,
+            signature,
+          }))
           .then((result) => {
             // Save to list of connections
             this.credentials[result.data.hashId] = {
@@ -70,9 +80,13 @@ module.exports = class User {
               did: org.did,
               subject: result.data.signedCredential,
             };
+			console.log(this.credentials);
             resolve(this.connections[org.did].peerDid);
           })
-          .catch((err) => { console.log(err); });
+          .catch((err) => {
+			  console.log('ERR', err.message);
+			  resolve(false);
+		  });
       }
     });
   }
@@ -97,7 +111,7 @@ module.exports = class User {
    */
   async registerConnectionString(connectionString, secretCode) {
     const connStr = connectionString.split('-');
-    const org = await this.caelum.loadOrganization(connStr[2], connStr[1]);
+    const org = await this.caelum.getOrganizationFromDid(connStr[2], connStr[1]);
     return this.register(org, connStr[1], secretCode);
   }
 

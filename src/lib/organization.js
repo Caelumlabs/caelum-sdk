@@ -1,7 +1,8 @@
 const debug = require('debug')('did:debug:org');
 const { hexToString, stringToHex, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
-const Crypto = require('../utils/crypto');
+const axios = require('axios');
+// const Crypto = require('../utils/crypto');
 
 const TOKENID = 1;
 
@@ -26,7 +27,7 @@ module.exports = class Organization {
     this.did = await this.blockchain.getDidFromOwner();
     this.seed = seed;
     this.keypair = this.blockchain.getKeyring(seed);
-	if (this.did) await this.getData();
+    if (this.did) await this.getData();
   }
 
   async registerToken(tokenId, tokenName, tokenSymbol, amount) {
@@ -39,7 +40,7 @@ module.exports = class Organization {
     await this.blockchain.mintToken(tokenId, this.keypair.address, amount);
   }
 
-  async registerOrganization(legalName, taxId, level, keys, tokenId, amount) {
+  async registerOrganization(legalName, taxId, level, keys, tokenId, amount ) {
     debug(`registerOrg - ${legalName}`);
     await this.blockchain.registerDid(keys.address, level, 2, legalName, taxId);
     await this.blockchain.wait4Event('DidRegistered');
@@ -66,10 +67,11 @@ module.exports = class Organization {
     endpoint,
   ) {
     this.blockchain.setKeyring(this.seed);
-    this.info = {
+    const info = {
       name, address, postalCode, city, countryCode, website, endpoint, phoneNumber,
     };
-    await this.blockchain.changeInfo(this.did, this.info);
+    await this.blockchain.changeInfo(this.did, info);
+    await this.getData();
   }
 
   async getData() {
@@ -95,17 +97,19 @@ module.exports = class Organization {
     this.info.level = data.level;
     this.certificates = {};
     const certificates = await this.blockchain.getCertificatesByDID(this.did);
-    for (let i = 0; i < certificates.length; i += 1) {
-      const certificateId = hexToString(certificates[i].certificate);
-      this.certificates[certificateId] = {
-        title: hexToString(certificates[i].data.title),
-        url: hexToString(certificates[i].data.url_certificate),
-        image: hexToString(certificates[i].data.url_image),
-        type: hexToString(certificates[i].data.cid_type),
-        totalIssued: certificates[i].data.total_hids_issued,
-        validFrom: certificates[i].data.block_valid_from,
-        validTo: certificates[i].data.block_valid_to,
-      };
+    if (certificates[0]) {
+      for (let i = 0; i < certificates.length; i += 1) {
+        const certificateId = hexToString(certificates[i].certificate);
+        this.certificates[certificateId] = {
+          title: hexToString(certificates[i].data.title),
+          url: hexToString(certificates[i].data.url_certificate),
+          image: hexToString(certificates[i].data.url_image),
+          type: hexToString(certificates[i].data.cid_type),
+          totalIssued: certificates[i].data.total_hids_issued,
+          validFrom: certificates[i].data.block_valid_from,
+          validTo: certificates[i].data.block_valid_to,
+        };
+      }
     }
     return this.info;
   }
@@ -221,8 +225,23 @@ module.exports = class Organization {
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-	const hashes = await this.blockchain.getAllHashesOfDid(this.did);
-	return valid;
+    const hashes = await this.blockchain.getAllHashesOfDid(this.did);
+    return valid;
+  }
+
+  async getSession(capability) {
+    return new Promise((resolve) => {
+      console.log(`${this.info.endpoint}auth/session`);
+      axios.post(`${this.info.endpoint}auth/session`, { capability })
+        .then((result) => {
+          // 1 - login/register to Tabit network (last param)
+          const connectionString = `1-${result.data.sessionIdString}-${this.did}-1`;
+          resolve({ sessionId: result.data.sessionId, connectionString });
+        })
+        .catch(() => {
+          resolve(false);
+        });
+    });
   }
 
   /*
