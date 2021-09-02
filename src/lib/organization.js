@@ -118,7 +118,7 @@ module.exports = class Organization {
     // Transfer all gas to new addr.
     console.log('2. Move Gas');
     // console.log(await this.blockchain.getAccountTokenData(tokenId, this.keypair.address));
-    // await this.blockchain.transferAllTokens(newKeys.address);
+    await this.blockchain.transferAllTokens(newKeys.address);
 
     // Transfer all tokens to new addr.
     const tokenAccountData = await this.blockchain.getAccountTokenData(tokenId, this.owner);
