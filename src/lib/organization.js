@@ -243,6 +243,10 @@ module.exports = class Organization {
     });
   }
 
+  async startSdk () {
+    this.sdk = new SDK(this.caelum, this.info.did, '', this.info.endpoint, 'peerdid')
+  }
+
   async setSession(tokenApi, capability) {
     this.sdk = new SDK(this.caelum, this.info.did, tokenApi, this.info.endpoint, capability);
     this.parameters = (capability === 'admin') ? await this.sdk.call('parameter', 'getAll') : false;

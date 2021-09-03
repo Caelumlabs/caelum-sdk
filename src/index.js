@@ -24,6 +24,7 @@ module.exports = class Caelum {
     const user = (userJson !== false) ? await this.newUser(userJson) : false;
     const idspace = (did !== false ) ? await this.getOrganizationFromDid(did) : false;
     if (user && idspace) await user.login(idspace, 'admin');
+    if (!user && idspace) await idspace.startSdk();
     return {user, idspace};
   }
 
