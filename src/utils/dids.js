@@ -313,7 +313,6 @@ module.exports = class DIDs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair
-   * @param {string} cid Certificate ID
    * @param {string} title Certicate's title
    * @param {string} urlCertificate Certificate's URL
    * @param {string} urlImage Certificate's URL image
@@ -321,7 +320,7 @@ module.exports = class DIDs {
    * @param {string} did DID to assign the new CID (Either null or Must exists)
    * @returns {Promise} of transaction
    */
-  async addCertificate (exec, keypair, cid, title, urlCertificate, urlImage, cidType, did) {
+  async addCertificate (exec, keypair, title, urlCertificate, urlImage, cidType, did) {
     if (title === undefined || title === null) {
       title = u8aToHex('\x00')
     }
@@ -337,7 +336,7 @@ module.exports = class DIDs {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
     }
-    const transaction = await exec.api.tx.idSpace.addCertificate(cid, title, urlCertificate, urlImage, cidType, did)
+    const transaction = await exec.api.tx.idSpace.addCertificate(title, urlCertificate, urlImage, cidType, did)
     return await exec.execTransaction(keypair, transaction)
   }
 

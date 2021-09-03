@@ -421,7 +421,6 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * DID to assign the CID. By default is Null and the Certificate ID
    * will be assigned to the DID of the sender transaction account
    *
-   * @param {string} cid CID
    * @param {string} title Certicate's title
    * @param {string} urlCertificate Certificate's URL
    * @param {string} urlImage Certificate's URL image
@@ -429,8 +428,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} did DID to assign the new CID (Either null or Must exists)
    * @returns {Promise} of transaction
    */
-  async addCertificate (cid, title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
-    return this.dids.addCertificate(this.exec, this.keypair, cid, title, urlCertificate, urlImage, cidType, did)
+  async addCertificate (title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
+    return this.dids.addCertificate(this.exec, this.keypair, title, urlCertificate, urlImage, cidType, did)
   }
 
   /**
