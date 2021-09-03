@@ -111,7 +111,7 @@ module.exports = class SDK {
   call(api, call, extra = {}) {
     let promise; let
       endpoint;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve ) => {
       if (methods[api] && methods[api].methods[call]) {
         const method = methods[api].methods[call];
         // Call parameters

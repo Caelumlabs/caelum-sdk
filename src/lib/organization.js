@@ -238,8 +238,22 @@ module.exports = class Organization {
     });
   }
 
-  async startSdk () {
-    this.sdk = new SDK(this.caelum, this.info.did, '', this.info.endpoint, 'peerdid')
+  async startSdk() {
+    this.sdk = new SDK(this.caelum, this.info.did, '', this.info.endpoint, 'peerdid');
+  }
+
+  waitSession(sessionIdString) {
+    return new Promise((resolve) => {
+      axios.get(`${this.info.endpoint}auth/session/wait/${sessionIdString}`)
+        .then(async (result) => {
+          this.sdk = new SDK(this.caelum, this.info.did, result.data.tokenApi, this.info.endpoint);
+          this.parameters = (result.data.capability === 'admin') ? await this.sdk.call('parameter', 'getAll') : false;
+          resolve(result.data);
+        })
+        .catch(() => {
+          resolve(false);
+        });
+    });
   }
 
   async setSession(tokenApi, capability) {
