@@ -68,11 +68,13 @@ module.exports = class User {
             this.connections[org.did] = keys;
             return this.signSession(sessionIdString, org.did, keys);
           })
-          .then((signature) => axios.put(`${org.info.endpoint}auth/session`, {
-            action: 'register',
-            secret: secretCode,
-            signature,
-          }))
+          .then((signature) => {
+            return axios.put(`${org.info.endpoint}auth/session`, {
+              action: 'register',
+              secret: secretCode,
+              signature,
+            });
+          })
           .then((result) => {
             // Save to list of connections
             this.credentials[result.data.hashId] = {
@@ -89,10 +91,14 @@ module.exports = class User {
     });
   }
 
+  /*
+   * Claim a notification -> get a certificate
+   *
+   * @param {object} org Organization
+   * @param {string} notId Notification ID
+   */
   async claim(org, notId) {
     const credential = await org.sdk.call('auth', 'claim', { params: [notId] });
-	console.log(credential);
-	  return;
 
     this.credentials[credential.hashId] = {
       peerDid: credential.user.peerDid,
@@ -115,10 +121,10 @@ module.exports = class User {
     return this.register(org, connStr[1], secretCode);
   }
 
-  findCredential(did, capacity) {
+  findCredential(did, capability) {
     for (const item in this.credentials) {
       if (this.credentials[item].did === did
-        && this.credentials[item].subject.credentialSubject.capability.type === capacity) {
+        && this.credentials[item].subject.credentialSubject.capability.type === capability) {
         return this.credentials[item].subject;
       }
     }
@@ -131,23 +137,28 @@ module.exports = class User {
    * @param {srting} did Organization to register with
    * @param {string} sessionId Session ID
    */
-  async login(did, capacity, _sessionId = 0) {
+  async login(idspace, capability, _sessionId = 0) {
+    const did = idspace.info.did.split(':').pop();
     const sessionIdString = (_sessionId === 0)
-      ? (await this.orgs[did].getSession(capacity)).sessionIdString
+      ? (await this.orgs[did].getSession(capability)).sessionIdString
       : _sessionId;
     const signature = await this.signSession(sessionIdString, did, this.connections[did]);
     const postData = {
       action: 'login',
       signature,
       approved: true,
-      credential: (capacity === 'peerdid') ? false : this.findCredential(did, capacity),
+      credential: (capability === 'peerdid') ? false : this.findCredential(did, capability),
     };
     return new Promise((resolve) => {
       axios.put(`${this.orgs[did].info.endpoint}auth/session`, postData)
         .then((session) => {
           this.sessions[did] = session.data;
-          resolve(this.sessions[did]);
+          return idspace.setSession(
+            this.sessions[did].tokenApi,
+            this.sessions[did].signedCredential.credentialSubject.capability.type
+          );
         })
+        .then(() => resolve(this.sessions[did]))
         .catch(() => {
 		  console.log('Error');
           resolve(false);
@@ -159,9 +170,9 @@ module.exports = class User {
   * Connection wit a connection String
   * @param {string} connectionString QR Code
   * */
-  async loginConnectionString(connectionString, capacity) {
+  async loginConnectionString(connectionString, capability) {
     const connStr = connectionString.split('-');
-    return this.login(connStr[2], capacity, connStr[1]);
+    return this.login(connStr[2], capability, connStr[1]);
   }
 
   /**
