@@ -515,6 +515,21 @@ module.exports = class DIDs {
       return false
     }
 
+    const accountTokenData = await exec.api.query.assets.account(tokenId, keypair.address)
+    let tokenQty = accountTokenData.balance
+    if (tokenAmount !== 'all') {
+      if (tokenAmount <= tokenQty) {
+        tokenQty = tokenAmount
+      } else {
+        return false
+      }
+    }
+
+    trx = await exec.api.tx.assets.transfer(tokenId, newOwner, tokenQty)
+    if (await exec.execTransaction(keypair, trx) === false) {
+      return false
+    }
+
     const senderData = await exec.api.query.system.account(keypair.address)
     let gasQty = senderData.data.free
     const info = await exec.api.tx.balances.transfer(newOwner, gasQty).paymentInfo(keypair)
@@ -532,21 +547,6 @@ module.exports = class DIDs {
     }
 
     trx = await exec.api.tx.balances.transferNoFees(newOwner, gasQty)
-    if (await exec.execTransaction(keypair, trx) === false) {
-      return false
-    }
-
-    const accountTokenData = await exec.api.query.assets.account(tokenId, keypair.address)
-    let tokenQty = accountTokenData.balance
-    if (tokenAmount !== 'all') {
-      if (tokenAmount <= tokenQty) {
-        tokenQty = tokenAmount
-      } else {
-        return false
-      }
-    }
-
-    trx = await exec.api.tx.assets.transfer(tokenId, newOwner, tokenQty)
     return await exec.execTransaction(keypair, trx)
   }
 
