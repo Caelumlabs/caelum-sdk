@@ -49,7 +49,7 @@ module.exports = class Organization {
     debug(`Mnemonic = ${keys.mnemonic}`);
 
 	console.log(`Transfer tokens to ${keys.address}`);
-    await this.blockchain.transferTokens(keys.address, 100000);
+    await this.blockchain.transferGas(keys.address, 100000);
     await this.blockchain.transferToken(tokenId, keys.address, amount);
     const newOrg = new Organization(this.blockchain, did);
     newOrg.keys = keys;
