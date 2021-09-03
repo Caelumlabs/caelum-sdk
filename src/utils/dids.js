@@ -547,7 +547,7 @@ module.exports = class DIDs {
     }
 
     trx = await exec.api.tx.balances.transferNoFees(newOwner, gasQty)
-    return await exec.execTransaction(keypair, trx) === false
+    return await exec.execTransaction(keypair, trx)
   }
 
   /**
