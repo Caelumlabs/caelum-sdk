@@ -153,14 +153,16 @@ module.exports = class User {
       axios.put(`${this.orgs[did].info.endpoint}auth/session`, postData)
         .then((session) => {
           this.sessions[did] = session.data;
+          const sessionType = (capability === 'peerdid')
+            ? false
+            : this.sessions[did].signedCredential.credentialSubject.capability.type;
           return idspace.setSession(
             this.sessions[did].tokenApi,
-            this.sessions[did].signedCredential.credentialSubject.capability.type
+            sessionType,
           );
         })
         .then(() => resolve(this.sessions[did]))
         .catch(() => {
-		  console.log('Error');
           resolve(false);
         });
     });

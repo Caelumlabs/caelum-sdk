@@ -5,7 +5,6 @@ const init = async () => {
   // Connect Caelum-SDK.
   const caelum = new Caelum(process.env.SUBSTRATE);
   await caelum.connect();
-
   // Connect ROOT Organization.
   const root = await caelum.getOrganizationFromSeed(process.env.ROOT_SEED);
   await root.registerToken(
