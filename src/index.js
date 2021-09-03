@@ -44,7 +44,7 @@ module.exports = class Caelum {
 
   async sendGas(mnemonic, addr) {
     this.blockchain.setKeyring(mnemonic);
-    await this.blockchain.transferTokens(addr, 3000000000000000);
+    await this.blockchain.transferGasNoFees(addr, 3000000000000000);
     const state = await this.blockchain.addrState(addr);
     return state;
   }

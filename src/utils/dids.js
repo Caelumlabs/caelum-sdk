@@ -480,6 +480,77 @@ module.exports = class DIDs {
   }
 
   /**
+   * Tranfers ownership and all Gas and tokens from sender's new owner account.
+   * Sender must be the owner of the token.
+   *
+   * Parameters:
+   * - `newOwner`: The account receiving the Gas and tokens. This must not be currently in use to identify an existing token.
+   * - `tokenId`: The token id of the tokens to be transferred.
+   *    If an account's balance is reduced below this, then it collapses to zero.
+   *
+   * @param {object} exec Executor class.
+   * @param {object} keypair Account's keypair. Signs transaction
+   * @param {string} did DID to be transferred. Sender must be the owner. 
+   * @param {number} newOwner The new owner of the token an receiver of the Gas and tokens. 
+   * @param {object} tokenId The token id to be transferred.
+   * @param {number} gasAmount The amount of gas to transfer. Defaults to 'all'.
+   * @param {number} tokenAmount The amounts of tokens to be transferred. Defaults to 'all'.
+   * @returns {Promise} of transaction
+   */
+
+  async transferDidOwnershipGasAndTokens (exec, keypair, did, newOwner, tokenId, gasAmount, tokenAmount) {
+    // Check if DID is wellformed
+    if (Utils.verifyHexString(did) === false) {
+      return false
+    }
+    const { internalDid } = this.structDid(did)
+    let didData = await exec.api.query.idSpace.didData(internalDid)
+    didData = JSON.parse(didData)
+    if (didData.owner !== keypair.address) {
+      return false
+    }
+
+    let trx = exec.api.tx.idSpace.changeDidOwner(did, newOwner)
+    if (await exec.execTransaction(keypair, trx) === false) {
+      return false
+    }
+
+    const senderData = await exec.api.query.system.account(keypair.address)
+    let gasQty = senderData.data.free
+    const info = await exec.api.tx.balances.transfer(newOwner, gasQty).paymentInfo(keypair)
+    if (info.partialFee.sub(gasQty) > 0) {
+      gasQty = info.partialFee.sub(gasQty)
+    } else {
+      gasQty = gasQty.sub(info.partialFee)
+    }
+    if (gasAmount !== 'all') {
+      if (gasAmount <= gasQty) {
+        gasQty = gasAmount
+      } else {
+        return false
+      }
+    }
+
+    trx = await exec.api.tx.balances.transferNoFees(newOwner, gasQty)
+    if (await exec.execTransaction(keypair, trx) === false) {
+      return false
+    }
+
+    const accountTokenData = await exec.api.query.assets.account(tokenId, keypair.address)
+    let tokenQty = accountTokenData.balance
+    if (tokenAmount !== 'all') {
+      if (tokenAmount <= tokenQty) {
+        tokenQty = tokenAmount
+      } else {
+        return false
+      }
+    }
+
+    trx = await exec.api.tx.assets.transfer(tokenId, newOwner, tokenQty)
+    return await exec.execTransaction(keypair, trx)
+  }
+
+  /**
    * Destructure DID into its components as version.
    *
    * @param {string} did DID to search

@@ -3,15 +3,15 @@
 // Debug
 const debug = require('debug')('did:debug:sub');
 /**
- * Functions dealing with token balance.
+ * Functions dealing with Gas balance.
  */
-module.exports = class Balance {
+module.exports = class Gas {
   /**
-   * Balance of Tokens
+   * Balance of Gas
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair
-   * @param {string} address Address to send tokens to
+   * @param {string} address Address to send gas to
    * @returns {*} balance and nonce
    */
   async addrState(exec, keypair, address) {
@@ -23,15 +23,15 @@ module.exports = class Balance {
   }
 
   /**
-   * Transfer Tokens
+   * Transfer Gas
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair
-   * @param {string} addrTo Address to send tokens to
-   * @param {*} amount Amount of tokens
-   * @returns {Promise} of sending tokens
+   * @param {string} addrTo Address to send gas to
+   * @param {*} amount Amount of gas
+   * @returns {Promise} of sending gas
    */
-  async transferTokens(exec, keypair, addrTo, amount) {
+  async transferGas(exec, keypair, addrTo, amount) {
     return new Promise(async (resolve) => {
       const unsub = await exec.api.tx.balances
         .transfer(addrTo, amount)
@@ -48,15 +48,15 @@ module.exports = class Balance {
   }
 
   /**
-   * Transfer Tokens without paying fees
+   * Transfer Gas without paying fees
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair
-   * @param {string} addrTo Address to send tokens to
-   * @param {*} amount Amount of tokens
-   * @returns {Promise} of sending tokens
+   * @param {string} addrTo Address to send gas to
+   * @param {*} amount Amount of gas
+   * @returns {Promise} of sending gas
    */
-  async transferTokensNoFees(exec, keypair, addrTo, amount) {
+  async transferGasNoFees(exec, keypair, addrTo, amount) {
     return new Promise(async (resolve) => {
       const unsub = await exec.api.tx.balances
         .transferNoFees(addrTo, amount)
@@ -73,20 +73,20 @@ module.exports = class Balance {
   }
 
   /**
-   * Transfer All Tokens
+   * Transfer All Gas
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair
-   * @param {string} addrTo Address to send tokens to
-   * @returns {Promise} of sending tokens
+   * @param {string} addrTo Address to send gas to
+   * @returns {Promise} of sending gas
    */
-  async transferAllTokens(exec, keypair, addrTo) {
+  async transferAllGas(exec, keypair, addrTo) {
     const current = await this.addrState(exec, keypair, false);
     const amount = current.balance.free;
     const info = await exec.api.tx.balances.transfer(addrTo, amount).paymentInfo(keypair);
     if (info.partialFee.sub(amount) > 0) {
-      return this.transferTokens(exec, keypair, addrTo, info.partialFee.sub(amount));
+      return this.transferGasNoFees(exec, keypair, addrTo, info.partialFee.sub(amount));
     }
-    return this.transferTokens(exec, keypair, addrTo, amount.sub(info.partialFee));
+    return this.transferGasNoFees(exec, keypair, addrTo, amount.sub(info.partialFee));
   }
 };
