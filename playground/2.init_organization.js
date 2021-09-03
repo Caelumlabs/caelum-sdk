@@ -20,7 +20,7 @@ const init = async () => {
     2000,
     orgKeys,
     process.env.TOKEN_ID,
-    100,
+    1000,
   );
 
   console.log(`Org admin DID: ${newOrg.did}`);

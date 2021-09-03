@@ -12,7 +12,7 @@ const init = async () => {
     process.env.TOKEN_ID,
     process.env.TOKEN_NAME,
     process.env.TOKEN_SYMBOL,
-    1000000,
+    1000000000,
   );
 
   // Register Basic Token.
@@ -36,6 +36,9 @@ const init = async () => {
     revokeCertificate: [process.env.TOKEN_ID, 10],
     addDocument: [process.env.TOKEN_ID, 1],
     addAttachment: [process.env.TOKEN_ID, 1],
+    startProcess: [process.env.TOKEN_ID, 0],
+    startSubprocess: [process.env.TOKEN_ID, 0],
+    startStep: [process.env.TOKEN_ID, 0],
   });
   // Disconnect.
   await caelum.disconnect();
