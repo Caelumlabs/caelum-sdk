@@ -118,18 +118,13 @@ module.exports = class Organization {
     this.blockchain.setKeyring(this.seed);
 
     // Transfer Ownership.
-    console.log('1. Change owner');
-    await this.blockchain.changeOwner(this.did, newKeys.address);
-
-    // Transfer all gas to new addr.
-    console.log('2. Move Gas');
-    // console.log(await this.blockchain.getAccountTokenData(tokenId, this.keypair.address));
-    await this.blockchain.transferAllTokens(newKeys.address);
-
-    // Transfer all tokens to new addr.
-    const tokenAccountData = await this.blockchain.getAccountTokenData(TOKENID, this.owner);
-    console.log("3. Transfer Tokens to " + newKeys.address, tokenAccountData.balance);
-    await this.blockchain.transferToken(TOKENID, newKeys.address, tokenAccountData.balance - 1);
+    await this.blockchain.transferDidOwnershipGasAndTokens (
+      this.did,
+      newKeys.address,
+      TOKENID,
+      'all',
+      'all'
+    );
 
     // Update keyring.
     console.log('4.update keys');
