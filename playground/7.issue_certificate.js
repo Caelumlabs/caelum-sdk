@@ -11,20 +11,19 @@ const init = async () => {
   orgAdmin.updateSigner(process.env.SIGNER_PUBLICKEY, process.env.SIGNER_PRIVATEKEY);
 
   // Create certificate.
-  const capability = orgAdmin.newAuthorisedCapability(
-    '2156156215',
-    1,
-    'admin',
-    'professional',
-    0,
-    0,
-  );
+  const certificate = {
+    holder: '12223232323',
+    subject: {
+      capability: { type: 'admin', sphere: 'professional' },
+    },
+    issuanceDate: '2021-05-03T12:25:19.526Z'
+  };
 
-  const signedCredential = await orgAdmin.signCapability(capability, '1');
+  const signedCredential = await orgAdmin.signCertificate('1', certificate, 'AuthorisedCapability');
   console.log(signedCredential);
 
   const validCredential = await orgAdmin.verifyCredential(signedCredential);
-  console.log(validCredential);
+  console.log('Validation:' + validCredential);
 
   // Disconnect.
   await caelum.disconnect();

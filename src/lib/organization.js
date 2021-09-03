@@ -161,53 +161,41 @@ module.exports = class Organization {
   }
 
   /*
-   * newAuthorisedCapability
+   * newCertificate
    * Creates a new Credential of type AuthorisedCapability
    *
    */
-  newAuthorisedCapability(holder, certificateId, type, sphere, validFrom, validTo) {
-    const subject = {
-      certificateId,
-      capability: {
-        type,
-        sphere,
-      },
-    };
+  async signCertificate(certificateId, certificate, type) {
+    // Base credential.
     const credential = {
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
         'https://caelumapp.com/context/v1',
       ],
-      id: `did:caelum:${this.did}#-`,
-      type: ['VerifiableCredential', 'AuthorisedCapability'],
+      type: ['VerifiableCredential', type],
       issuer: `did:caelum:${this.did}`,
-      holder,
-      credentialSubject: subject,
+      credentialSubject: {
+        id: `did:caelum:${certificateId}`,
+        ...certificate.subject,
+      },
     };
-    if (validFrom) credential.validFrom = validFrom;
-    if (validTo) credential.validTo = validTo;
-    return credential;
-  }
+    if (certificate.validFrom) credential.credentialSubject.validFrom = certificate.validFrom;
+    if (certificate.validTo) credential.credentialSubject.validTo = certificate.validTo;
+    if (certificate.holder) credential.holder = certificate.holder;
+    credential.issuanceDate = certificate.issuanceDate || new Date().toISOString();
 
-  /**
-   * Sign a credential
-   *
-   * @param {object} credential The Verifiable credential
-   */
-  async signCapability(credential, certificateId) {
+    // Base Issuer.
     const issuer = {
       Issuer: {
         keypair: {
           public_key: this.signer.publicKey,
           private_key: this.signer.privateKey,
         },
-        PublicKeyUrl: `did:caelum:${this.did}`,
+        PublicKeyUrl: `did:caelum:${this.info.did}`,
       },
     };
-    const jsonCred = credential;
-    jsonCred.issuanceDate = new Date().toISOString();
-    const signedCredential = await W3C.signCredential(jsonCred, issuer);
-    await this.blockchain.putHash(this.did, signedCredential.proof.jws, certificateId, 'capability');
+    const signedCredential = await W3C.signCredential(credential, issuer);
+    await this.blockchain.putHash(this.did, signedCredential.proof.jws, certificateId, type);
     await this.blockchain.wait4Event('CredentialAssigned');
     return signedCredential;
   }
@@ -219,7 +207,8 @@ module.exports = class Organization {
    */
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
-    // const hash = await this.blockchain.getHash(signedCredential.proof.jws);
+    const hash = await this.blockchain.getHash(signedCredential.proof.jws);
+	// console.log(hash, signedCredential.proof.jws);
     // const hashes = await this.blockchain.getAllHashesOfDid(this.did);
     return valid;
   }
