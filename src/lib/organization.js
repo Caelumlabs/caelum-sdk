@@ -40,15 +40,13 @@ module.exports = class Organization {
     await this.blockchain.mintToken(tokenId, this.keypair.address, amount);
   }
 
-  async registerOrganization(legalName, taxId, level, keys, tokenId, amount ) {
+  async registerOrganization(legalName, taxId, level, keys, tokenId, amount) {
     debug(`registerOrg - ${legalName}`);
     await this.blockchain.registerDid(keys.address, level, 2, legalName, taxId);
     await this.blockchain.wait4Event('DidRegistered');
     const did = await this.blockchain.getDidFromOwner(keys.address);
     debug(`DID = ${did}`);
     debug(`Mnemonic = ${keys.mnemonic}`);
-
-	console.log(`Transfer tokens to ${keys.address}`);
     await this.blockchain.transferGas(keys.address, 100000);
     await this.blockchain.transferToken(tokenId, keys.address, amount);
     const newOrg = new Organization(this.blockchain, did);
@@ -114,23 +112,17 @@ module.exports = class Organization {
     return this.info;
   }
 
-  async transferOwnership(newKeys, tokenId) {
+  async transferOwnership(newKeys) {
     this.blockchain.setKeyring(this.seed);
 
     // Transfer Ownership.
-    await this.blockchain.transferDidOwnershipGasAndTokens (
-      this.did,
-      newKeys.address,
-      TOKENID,
-      'all',
-      'all'
+    await this.blockchain.transferDidOwnershipGasAndTokens(
+      this.did, newKeys.address, TOKENID, 'all', 'all',
     );
 
     // Update keyring.
-    console.log('4.update keys');
     this.seed = newKeys.mnemonic;
     this.keypair = newKeys.keyPair;
-    console.log('Set seed ');
     this.blockchain.setKeyring(this.seed);
   }
 
@@ -173,7 +165,7 @@ module.exports = class Organization {
         'https://caelumapp.com/context/v1',
       ],
       type: ['VerifiableCredential', type],
-      issuer: `did:caelum:${this.did}`,
+      issuer: `did:caelum:${this.info.did}`,
       credentialSubject: {
         id: `did:caelum:${certificateId}`,
         ...certificate.subject,

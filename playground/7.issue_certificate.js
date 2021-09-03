@@ -10,7 +10,7 @@ const init = async () => {
   const orgAdmin = await caelum.getOrganizationFromSeed(process.env.ORG_SEED);
   orgAdmin.updateSigner(process.env.SIGNER_PUBLICKEY, process.env.SIGNER_PRIVATEKEY);
 
-  // Create certificate.
+  // Issue certificate.
   const certificate = {
     holder: '12223232323',
     subject: {

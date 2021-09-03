@@ -137,11 +137,11 @@ module.exports = class User {
    * @param {srting} did Organization to register with
    * @param {string} sessionId Session ID
    */
-  async login(idspace, capability, _sessionId = 0) {
+  async login(idspace, capability, _sessionIdString = 0) {
     const did = idspace.info.did.split(':').pop();
     const sessionIdString = (_sessionId === 0)
       ? (await this.orgs[did].getSession(capability)).sessionIdString
-      : _sessionId;
+      : _sessionIdString;
     const signature = await this.signSession(sessionIdString, did, this.connections[did]);
     const postData = {
       action: 'login',

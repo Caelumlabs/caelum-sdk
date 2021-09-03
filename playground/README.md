@@ -9,13 +9,12 @@ export DEBUG="did:*"
 
 Edit .env and change the name of the token and the organization you want to register.
 
+## Setup -> let's create the Basic token for the ecosystem.
 ```bash
 node 1.setup.js
 ```
 
-Edit .env and save the mnemonic for Admin as TOKEN_ADMIN
-Now check everything is deployed to the Blockchain.
-
+## Init ORG -> Regsiter the first organization
 ```bash
 node 2.check.js
 ```
