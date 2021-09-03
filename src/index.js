@@ -19,8 +19,12 @@ module.exports = class Caelum {
     this.crypto = Crypto;
   }
 
-  async connect() {
+  async connect(userJson = false, did = false) {
     await this.blockchain.connect();
+    const user = (userJson !== false) ? await this.newUser(userJson) : false;
+    const idspace = (did !== false ) ? await this.getOrganizationFromDid(did) : false;
+    if (user && idspace) await user.login(idspace, 'admin');
+    return {user, idspace};
   }
 
   async disconnect() {
