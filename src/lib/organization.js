@@ -93,22 +93,7 @@ module.exports = class Organization {
     this.info.website = (data.info.website) ? hexToString(data.info.website) : '';
     this.info.endpoint = (data.info.endpoint) ? hexToString(data.info.endpoint) : '';
     this.info.level = data.level;
-    this.certificates = {};
-    const certificates = await this.blockchain.getCertificatesByDID(this.did);
-    if (certificates[0]) {
-      for (let i = 0; i < certificates.length; i += 1) {
-        const certificateId = hexToString(certificates[i].certificate);
-        this.certificates[certificateId] = {
-          title: hexToString(certificates[i].data.title),
-          url: hexToString(certificates[i].data.url_certificate),
-          image: hexToString(certificates[i].data.url_image),
-          type: hexToString(certificates[i].data.cid_type),
-          totalIssued: certificates[i].data.total_hids_issued,
-          validFrom: certificates[i].data.block_valid_from,
-          validTo: certificates[i].data.block_valid_to,
-        };
-      }
-    }
+    this.certificates = await this.blockchain.getCertificatesByDID(this.did);
     return this.info;
   }
 

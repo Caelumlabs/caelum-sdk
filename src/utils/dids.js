@@ -427,15 +427,26 @@ module.exports = class DIDs {
       return false
     }
     const allCids = await exec.api.query.idSpace.certificates.entries()
-    const cids = allCids
+    let cids = allCids
       .map((v) => {
         const data = JSON.parse(v[1])
         if (data.did_owner === did && data.timepoint_valid_to.height === 0) {
-          const cid = '0x' + u8aToHex(v[0]).slice(100)
-          return { certificate: cid, data: data }
+          //TODO: Transform validFrom and validTo into Dates.
+          const certificate = {
+            did: '0x' + u8aToHex(v[0]).slice(100),
+            title : hexToString(data.title),
+            url: hexToString(data.url_certificate),
+            image: hexToString(data.url_image),
+            totalIssued: data.total_hids_issued,
+            version: data.release,
+            validFrom: data.timepoint_valid_from,
+            validTo: data.timepoint_valid_to
+          }
+          return certificate;
         }
       })
-    return cids
+    cids = cids.filter(el => {return !(el===undefined)});
+    return cids;
   }
 
   /**
