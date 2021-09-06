@@ -10,7 +10,8 @@ const init = async () => {
   const orgAdmin = await caelum.getOrganizationFromSeed(process.env.ORG_SEED);
 
   // Transfer Ownership.
-  await orgAdmin.registerCertificate(1, 'Member of CaelumLabs', null, null, 'memberOf');
+  const cid = await orgAdmin.registerCertificate('Member of CaelumLabs', 'memberOf');
+  console.log('New CID = ' + cid);
 
   // console.log(`Org admin Addr: ${newKeys.address}`);
   console.log(await orgAdmin.getCertificates());

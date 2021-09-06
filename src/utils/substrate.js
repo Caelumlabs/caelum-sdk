@@ -429,8 +429,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} did DID to assign the new CID (Either null or Must exists)
    * @returns {Promise} of transaction
    */
-  async addCertificate (cid, title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
-    return this.dids.addCertificate(this.exec, this.keypair, cid, title, urlCertificate, urlImage, cidType, did)
+  async addCertificate (title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
+    return this.dids.addCertificate(this.exec, this.keypair, title, urlCertificate, urlImage, cidType, did)
   }
 
   /**
@@ -509,7 +509,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   async getAllHashesForDid (did) {
     return await this.dids.getAllHashesForDid(this.exec, did)
   }
-  
+
   /**
    * Starts a Process.
    * This must be the first call when a recipe o process is being executed
@@ -1139,7 +1139,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * Set tokens ids and costs for transactions.
    * Origin must be root.
    *
-   * @param {object} tokenAndCost The set of tokens ids and costs for transactions. 
+   * @param {object} tokenAndCost The set of tokens ids and costs for transactions.
    * @returns {Promise} of transaction
    */
   async setTokensAndCosts(tokenAndCost) {
@@ -1792,8 +1792,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * - `tokenId`: The token id of the tokens to be transferred.
    *    If an account's balance is reduced below this, then it collapses to zero.
    *
-   * @param {string} did DID to be transferred. Sender must be the owner. 
-   * @param {number} newOwner The new DID owner and receiver of the Gas and tokens. 
+   * @param {string} did DID to be transferred. Sender must be the owner.
+   * @param {number} newOwner The new DID owner and receiver of the Gas and tokens.
    * @param {object} tokenId The token id to be transferred.
    * @param {number} gasAmount The amount of gas to transfer. Defaults to 'all'.
    * @param {number} tokenAmount The amounts of tokens to be transferred. Defaults to 'all'.

@@ -9,10 +9,8 @@ const init = async () => {
 
   // Connect to organization.
   const orgAdmin = await caelum.getOrganizationFromSeed(process.env.ORG_SEED);
-  orgAdmin.updateSigner(process.env.SIGNER_PUBLICKEY, process.env.SIGNER_PRIVATEKEY);
-
-  const validCredential = await orgAdmin.verifyCredential(signedCredential);
-  console.log(validCredential);
+  const hashes = await orgAdmin.getHashes();
+  console.log(hashes);
 
   // Disconnect.
   await caelum.disconnect();

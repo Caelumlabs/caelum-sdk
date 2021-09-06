@@ -19,7 +19,7 @@ const init = async () => {
     issuanceDate: '2021-05-03T12:25:19.526Z'
   };
 
-  const signedCredential = await orgAdmin.signCertificate('1', certificate, 'AuthorisedCapability');
+  const signedCredential = await orgAdmin.signCertificate(process.env.CERTIFICATE_DID, certificate, 'AuthorisedCapability');
   console.log(signedCredential);
 
   const validCredential = await orgAdmin.verifyCredential(signedCredential);

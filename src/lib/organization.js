@@ -142,9 +142,10 @@ module.exports = class Organization {
     };
   }
 
-  async registerCertificate(cid, title, url, image, type) {
-    await this.blockchain.addCertificate(stringToHex(cid), title, url, image, type);
-    await this.blockchain.wait4Event('CIDCreated');
+  async registerCertificate(title, type, url = '', image = '') {
+    await this.blockchain.addCertificate(title, url, image, type);
+    const event = await this.blockchain.wait4Event('CIDCreated');
+    return (event[0]);
   }
 
   async getCertificates() {
@@ -200,9 +201,17 @@ module.exports = class Organization {
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-	// console.log(hash, signedCredential.proof.jws);
-    // const hashes = await this.blockchain.getAllHashesOfDid(this.did);
+	console.log('Hash', hash);
+    // const hashes = await this.blockchain.getAllHashesForDid(this.did);
     return valid;
+  }
+
+  /*
+   * get all Hashes
+   */
+  async getHashes() {
+    const hashes = await this.blockchain.getAllHashesForDid(this.did);
+    return hashes;
   }
 
   async getSession(capability) {

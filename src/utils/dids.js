@@ -337,7 +337,7 @@ module.exports = class DIDs {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
     }
-    const transaction = await exec.api.tx.idSpace.addCertificate(cid, title, urlCertificate, urlImage, cidType, did)
+    const transaction = await exec.api.tx.idSpace.addCertificate(title, urlCertificate, urlImage, cidType, did)
     return await exec.execTransaction(keypair, transaction)
   }
 
@@ -490,8 +490,8 @@ module.exports = class DIDs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {string} did DID to be transferred. Sender must be the owner. 
-   * @param {number} newOwner The new owner of the token an receiver of the Gas and tokens. 
+   * @param {string} did DID to be transferred. Sender must be the owner.
+   * @param {number} newOwner The new owner of the token an receiver of the Gas and tokens.
    * @param {object} tokenId The token id to be transferred.
    * @param {number} gasAmount The amount of gas to transfer. Defaults to 'all'.
    * @param {number} tokenAmount The amounts of tokens to be transferred. Defaults to 'all'.
