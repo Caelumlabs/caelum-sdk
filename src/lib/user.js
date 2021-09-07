@@ -137,9 +137,9 @@ module.exports = class User {
    * @param {srting} did Organization to register with
    * @param {string} sessionId Session ID
    */
-  async login(idspace, capability, _sessionIdString = 0) {
-    const did = idspace.info.did.split(':').pop();
-    const sessionIdString = (_sessionId === 0)
+  async login(org, capability, _sessionIdString = 0) {
+    const did = org.info.did.split(':').pop();
+    const sessionIdString = (_sessionIdString === 0)
       ? (await this.orgs[did].getSession(capability)).sessionIdString
       : _sessionIdString;
     const signature = await this.signSession(sessionIdString, did, this.connections[did]);
@@ -156,7 +156,7 @@ module.exports = class User {
           const sessionType = (capability === 'peerdid')
             ? false
             : this.sessions[did].signedCredential.credentialSubject.capability.type;
-          return idspace.setSession(
+          return org.setSession(
             this.sessions[did].tokenApi,
             sessionType,
           );
@@ -174,7 +174,8 @@ module.exports = class User {
   * */
   async loginConnectionString(connectionString, capability) {
     const connStr = connectionString.split('-');
-    return this.login(connStr[2], capability, connStr[1]);
+    const org = await this.caelum.getOrganizationFromDid(connStr[2], connStr[1]);
+    return this.login(org, capability, connStr[1]);
   }
 
   /**
