@@ -130,7 +130,7 @@ module.exports = class Organization {
   async registerCertificate(title, type, url = '', image = '') {
     await this.blockchain.addCertificate(title, url, image, type);
     const event = await this.blockchain.wait4Event('CIDCreated');
-    return (event[0]);
+    return `did:caelum:${event[0]}`;
   }
 
   async getCertificates() {
@@ -143,7 +143,7 @@ module.exports = class Organization {
    * Creates a new Credential of type AuthorisedCapability
    *
    */
-  async signCertificate(certificateId, certificate, type) {
+  async signCertificate(certificateDid, certificate, type) {
     // Base credential.
     const credential = {
       '@context': [
@@ -151,9 +151,9 @@ module.exports = class Organization {
         'https://caelumapp.com/context/v1',
       ],
       type: ['VerifiableCredential', type],
-      issuer: `did:caelum:${this.info.did}`,
+      issuer: this.info.did,
       credentialSubject: {
-        id: `did:caelum:${certificateId}`,
+        id: certificateDid,
         ...certificate.subject,
       },
     };
@@ -169,11 +169,12 @@ module.exports = class Organization {
           public_key: this.signer.publicKey,
           private_key: this.signer.privateKey,
         },
-        PublicKeyUrl: `did:caelum:${this.info.did}`,
+        PublicKeyUrl: this.info.did,
       },
     };
+    const certificateDid_items = certificateDid.split(':');
     const signedCredential = await W3C.signCredential(credential, issuer);
-    await this.blockchain.putHash(this.did, signedCredential.proof.jws, certificateId, type);
+    await this.blockchain.putHash(this.did, signedCredential.proof.jws, certificateDid_items[2], type);
     await this.blockchain.wait4Event('CredentialAssigned');
     return signedCredential;
   }
@@ -186,7 +187,7 @@ module.exports = class Organization {
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-	console.log('Hash', hash);
+	  console.log('Hash', hash);
     // const hashes = await this.blockchain.getAllHashesForDid(this.did);
     return valid;
   }

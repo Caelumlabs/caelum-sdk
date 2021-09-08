@@ -321,7 +321,7 @@ module.exports = class DIDs {
    * @param {string} did DID to assign the new CID (Either null or Must exists)
    * @returns {Promise} of transaction
    */
-  async addCertificate (exec, keypair, cid, title, urlCertificate, urlImage, cidType, did) {
+  async addCertificate (exec, keypair, title, urlCertificate, urlImage, cidType, did) {
     if (title === undefined || title === null) {
       title = u8aToHex('\x00')
     }
@@ -433,7 +433,7 @@ module.exports = class DIDs {
         if (data.did_owner === did && data.timepoint_valid_to.height === 0) {
           //TODO: Transform validFrom and validTo into Dates.
           const certificate = {
-            did: '0x' + u8aToHex(v[0]).slice(100),
+            did: 'did:caelum:0x' + u8aToHex(v[0]).slice(100),
             title : hexToString(data.title),
             url: hexToString(data.url_certificate),
             image: hexToString(data.url_image),
