@@ -12,6 +12,29 @@ const debug = require('debug')('did:debug:sub');
  */
 module.exports = class DIDs {
   /**
+   * Constructor
+   *
+   * @param {string} format Format presentation for DIDs
+   */
+  constructor (format) {
+    this.format = format
+    this.DIDPrefix = 'A'
+    this.DIDSep = ':'
+    this.CIDPrefix = 'B'
+    this.CIDSep = ':'
+  }
+
+  /**
+   * Sets a format 
+   *
+   * @param {string} format Format to set
+   * @returns {Promise} Result of the transaction
+   */
+  async setFormat (format) {
+    this.format = format
+  }
+
+  /**
    * Registers Did in Substrate.
    *
    * @param {object} exec Executor class.
@@ -37,10 +60,15 @@ module.exports = class DIDs {
    * @param {object} storageAddress Arweave storage address (Vec<u8>)
    * @returns {Promise} Result of the transaction
    */
-  async setStorageAddress(exec, keypair, did, storageAddress) {
-    const storageAddr = u8aToHex(storageAddress);
-    const transaction = await exec.api.tx.idSpace.setStorageAddress(did, storageAddr);
-    return await exec.execTransaction(keypair, transaction);
+  async setStorageAddress (exec, keypair, did, storageAddress) {
+    // Check if DID is wellformed
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
+    }
+    const storageAddr = u8aToHex(storageAddress)
+    const transaction = await exec.api.tx.idSpace.setStorageAddress(did, storageAddr)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -59,6 +87,12 @@ module.exports = class DIDs {
   async setKey (exec, keypair, did, pubKey, typ) {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
+    } else {
+      // Check if DID is wellformed
+      did = Utils.verifyHexString(did, this.format)
+      if (did === false) {
+        return false
+      }
     }
     // Convert pubKey to vec[u8]
     const keyArray = u8aToHex(Utils.toUTF8Array(pubKey))
@@ -78,8 +112,9 @@ module.exports = class DIDs {
    */
   async changeOwner (exec, keypair, did, newOwner) {
     // Check if DID is wellformed
-    if (Utils.verifyHexString(did) === false) {
-      return false;
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
     }
     const transaction = await exec.api.tx.idSpace.changeDidOwner(did, newOwner);
     return await exec.execTransaction(keypair, transaction);
@@ -97,6 +132,11 @@ module.exports = class DIDs {
    * @returns {Promise} Result of the transaction
    */
   async putHash (exec, keypair, did, credential, certificate, typ) {
+    // Check if DID is wellformed
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
+    }
     const transaction = await exec.api.tx.idSpace.putHash(did, credential, certificate, typ)
     return await exec.execTransaction(keypair, transaction)
   }
@@ -112,11 +152,16 @@ module.exports = class DIDs {
    * @param {object} taxId New Tax Id (if null will not be changed)
    * @returns {Promise} Result of the transaction
    */
-  async changeLegalNameOrTaxId(exec, keypair, did, legalName, taxId) {
-    if (legalName === null) { legalName = '0x00'; }
-    if (taxId === null) { taxId = '0x00'; }
-    const transaction = await exec.api.tx.idSpace.changeLegalNameOrTaxId(did, legalName, taxId);
-    return await exec.execTransaction(keypair, transaction);
+  async changeLegalNameOrTaxId (exec, keypair, did, legalName, taxId) {
+    // Check if DID is wellformed
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
+    }
+    if (legalName === null) { legalName = '0x00' }
+    if (taxId === null) { taxId = '0x00' }
+    const transaction = await exec.api.tx.idSpace.changeLegalNameOrTaxId(did, legalName, taxId)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -145,6 +190,11 @@ module.exports = class DIDs {
     if (phoneNumber === null) { phoneNumber = '0x00' }
     if (website === null) { website = '0x00' }
     if (endpoint === null) { endpoint = '0x00' }
+    // Check if DID is wellformed
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
+    }
     const transaction = await exec.api.tx.idSpace.updateInfo(did, name, address, postalCode, city, countryCode, phoneNumber, website, endpoint)
     return await exec.execTransaction(keypair, transaction)
   }
@@ -159,6 +209,11 @@ module.exports = class DIDs {
    * @returns {Promise} Result of the transaction
    */
   async revokeHash (exec, keypair, did, credential) {
+    // Check if DID is wellformed
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
+    }
     const transaction = await exec.api.tx.idSpace.revokeHash(did, credential)
     return await exec.execTransaction(keypair, transaction)
   }
@@ -173,7 +228,8 @@ module.exports = class DIDs {
    */
   async removeDid (exec, keypair, did) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
     const transaction = await exec.api.tx.idSpace.removeDid(did)
@@ -189,12 +245,15 @@ module.exports = class DIDs {
    */
   async getDidData (exec, did) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
-    const { internalDid } = this.structDid(did)
-    const didData = await exec.api.query.idSpace.didData(internalDid)
-    return JSON.parse(didData)
+    const { internalDid } = Utils.structDid(did)
+    let didData = await exec.api.query.idSpace.didData(internalDid)
+    didData = JSON.parse(didData)
+    didData.did_promoter = Utils.formatHexString(didData.did_promoter, this.format, this.DIDPrefix, this.DIDSep)
+    return didData
   }
 
   /**
@@ -208,11 +267,12 @@ module.exports = class DIDs {
     const didData = allDidData
       .map((v) => {
         const data = JSON.parse(v[1])
+        data.did_promoter = Utils.formatHexString(data.did_promoter, this.format, this.DIDPrefix, this.DIDSep)
         const did = '0x' + Utils.decimalToHex(data.did_version, 2) +
                            Utils.decimalToHex(data.network_id, 4) +
                            Utils.decimalToHex(data.did_type, 2) +
                            u8aToHex(v[0]).slice(100)
-        return { did: did, data: data }
+        return { did: Utils.formatHexString(did, this.format, this.DIDPrefix, this.DIDSep), data: data }
       })
     return didData
   }
@@ -226,11 +286,12 @@ module.exports = class DIDs {
    */
   async getOwnerFromDid (exec, did) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
-      return false;
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
+      return false
     }
-    const { internalDid } = this.structDid(did);
-    return await exec.api.query.idSpace.ownerFromDid(internalDid);
+    const { internalDid } = Utils.structDid(did)
+    return await exec.api.query.idSpace.ownerFromDid(internalDid)
   }
 
   /**
@@ -240,9 +301,9 @@ module.exports = class DIDs {
    * @param {string} owner DID
    * @returns {string} DID
    */
-  async getDidFromOwner(exec, owner) {
-    const did = await exec.api.query.idSpace.didFromOwner(owner);
-    return u8aToHex(did);
+  async getDidFromOwner (exec, owner) {
+    const did = await exec.api.query.idSpace.didFromOwner(owner)
+    return Utils.formatHexString(u8aToHex(did), this.format, this.DIDPrefix, this.DIDSep)
   }
 
   /**
@@ -260,10 +321,11 @@ module.exports = class DIDs {
       did = this.getDidFromOwner(exec, this.keypair.address)
     }
     // Check if DID is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
-    const { internalDid } = this.structDid(did)
+    const { internalDid } = Utils.structDid(did)
     const result = await exec.api.query.idSpace.publicKeyFromDid([internalDid, typ])
     return bufferToU8a(result)
   }
@@ -282,10 +344,11 @@ module.exports = class DIDs {
       did = this.getDidFromOwner(exec, this.keypair.address)
     }
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
-    const { internalDid } = this.structDid(did)
+    const { internalDid } = Utils.structDid(did)
     const result = await exec.api.query.idSpace.publicKeyFromDid([internalDid, typ])
     return bufferToU8a(result)
   }
@@ -299,10 +362,11 @@ module.exports = class DIDs {
    */
   async getStorageAddressHash (exec, did) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
-    const { internalDid } = this.structDid(did)
+    const { internalDid } = Utils.structDid(did)
     return await exec.api.query.idSpace.storageAddressFromDid(internalDid)
   }
 
@@ -313,7 +377,6 @@ module.exports = class DIDs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair
-   * @param {string} cid Certificate ID
    * @param {string} title Certicate's title
    * @param {string} urlCertificate Certificate's URL
    * @param {string} urlImage Certificate's URL image
@@ -336,6 +399,11 @@ module.exports = class DIDs {
     }
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
+    } else {
+      did = Utils.verifyHexString(did, this.format)
+      if (did === false) {
+        return false
+      }
     }
     const transaction = await exec.api.tx.idSpace.addCertificate(title, urlCertificate, urlImage, cidType, did)
     return await exec.execTransaction(keypair, transaction)
@@ -353,6 +421,14 @@ module.exports = class DIDs {
    * @returns {Promise} of transaction
    */
   async revokeCertificate (exec, keypair, cid, did) {
+    if (did === undefined || did === null) {
+      did = u8aToHex('\x00')
+    } else {
+      did = Utils.verifyHexString(did, this.format)
+      if (did === false) {
+        return false
+      }
+    }
     const transaction = await exec.api.tx.idSpace.revokeCertificate(cid, did)
     return await exec.execTransaction(keypair, transaction)
   }
@@ -406,7 +482,7 @@ module.exports = class DIDs {
    */
   async getCertificateByKey (exec, cid) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(cid) === false) {
+    if (Utils.verifyHexString(cid, this.format) === false) {
       return false
     }
     return await exec.api.query.idSpace.certificates(cid)
@@ -423,7 +499,8 @@ module.exports = class DIDs {
    */
   async getCertificatesByDID (exec, did) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
     const allCids = await exec.api.query.idSpace.certificates.entries()
@@ -431,22 +508,14 @@ module.exports = class DIDs {
       .map((v) => {
         const data = JSON.parse(v[1])
         if (data.did_owner === did && data.timepoint_valid_to.height === 0) {
-          //TODO: Transform validFrom and validTo into Dates.
-          const certificate = {
-            did: 'did:caelum:0x' + u8aToHex(v[0]).slice(100),
-            title : hexToString(data.title),
-            url: hexToString(data.url_certificate),
-            image: hexToString(data.url_image),
-            totalIssued: data.total_hids_issued,
-            version: data.release,
-            validFrom: data.timepoint_valid_from,
-            validTo: data.timepoint_valid_to
-          }
-          return certificate;
+          const cid = '0x' + u8aToHex(v[0]).slice(100)
+          data.did_owner = Utils.formatHexString(data.did_owner, this.format, this.DIDPrefix, this.DIDSep)
+          return { certificate: cid, data: data }
         }
+        return null
       })
-    cids = cids.filter(el => {return !(el===undefined)});
-    return cids;
+    cids = cids.filter(d => d !== null)
+    return cids
   }
 
   /**
@@ -458,10 +527,13 @@ module.exports = class DIDs {
    */
   async getHash (exec, hash) {
     // Check if Credential/Hash wellformed
-    if (Utils.verifyHexString(hash) === false) {
+    hash = Utils.verifyHexString(hash, this.format)
+    if (hash === false) {
       return false
     }
-    return JSON.parse(await exec.api.query.idSpace.hashes(hash))
+    const hashData = JSON.parse(await exec.api.query.idSpace.hashes(hash))
+    hashData.did = Utils.formatHexString(hashData.did, this.format, this.DIDPrefix, this.DIDSep)
+    return hashData
   }
 
   /**
@@ -473,10 +545,11 @@ module.exports = class DIDs {
    */
   async getAllHashesForDid (exec, did) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
-    const { internalDid } = this.structDid(did)
+    const { internalDid } = Utils.structDid(did)
     const didData = await exec.api.query.idSpace.didData(internalDid)
     let hashes = []
     if (didData.credentials.isNone) {
@@ -487,7 +560,11 @@ module.exports = class DIDs {
       return { hash: d, data: data }
     })
     hashes = await Promise.all(hashes)
-    return hashes.map((h) => { return { hash: u8aToHex(h.hash), data: JSON.parse(h.data) } })
+    return hashes.map((h) => {
+      h.data = JSON.parse(h.data)
+      h.data.did = Utils.formatHexString(h.data.did, this.format, this.DIDPrefix, this.DIDSep)
+      return { hash: u8aToHex(h.hash), data: h.data }
+    })
   }
 
   /**
@@ -511,10 +588,11 @@ module.exports = class DIDs {
 
   async transferDidOwnershipGasAndTokens (exec, keypair, did, newOwner, tokenId, gasAmount, tokenAmount) {
     // Check if DID is wellformed
-    if (Utils.verifyHexString(did) === false) {
+    did = Utils.verifyHexString(did, this.format)
+    if (did === false) {
       return false
     }
-    const { internalDid } = this.structDid(did)
+    const { internalDid } = Utils.structDid(did)
     let didData = await exec.api.query.idSpace.didData(internalDid)
     didData = JSON.parse(didData)
     if (didData.owner !== keypair.address) {
@@ -544,15 +622,24 @@ module.exports = class DIDs {
     const senderData = await exec.api.query.system.account(keypair.address)
     let gasQty = senderData.data.free
     const info = await exec.api.tx.balances.transfer(newOwner, gasQty).paymentInfo(keypair)
-    if (info.partialFee.sub(gasQty) > 0) {
-      gasQty = info.partialFee.sub(gasQty)
+    const existentialDeposit = await exec.api.consts.balances.existentialDeposit
+    if (gasQty > existentialDeposit) {
+      gasQty = gasQty.sub(existentialDeposit)
     } else {
+      console.log('Can not transfer any gas to destination')
+      return false
+    }
+    if (gasQty > info.partialFee) {
       gasQty = gasQty.sub(info.partialFee)
+    } else {
+      console.log('Can not transfer any gas to destination')
+      return false
     }
     if (gasAmount !== 'all') {
       if (gasAmount <= gasQty) {
         gasQty = gasAmount
       } else {
+        console.log('Can not transfer any gas to destination')
         return false
       }
     }
@@ -562,17 +649,14 @@ module.exports = class DIDs {
   }
 
   /**
-   * Destructure DID into its components as version.
+   * Set the representation format for DIDs.
    *
-   * @param {string} did DID to search
-   * @returns {object} Certificate array
+   * @param {string} format DID format
+   * @returns {object} old format
    */
-  structDid (did) {
-    return {
-      version: did.slice(2, 4),
-      network: did.slice(4, 8),
-      didType: did.slice(8, 10),
-      internalDid: did.slice(0, 2).concat(did.slice(10))
-    }
+  setDidFormat (format) {
+    const oldFormat = this.format
+    this.format = format
+    return oldFormat
   }
 }

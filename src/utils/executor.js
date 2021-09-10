@@ -75,10 +75,10 @@ module.exports = class Executor {
         // loop through
         events.forEach((record) => {
           // extract the phase, event and the event types
-          const { event } = record;
-          const types = event.typeDef;
-          if (event.section === 'idSpace' && event.method === eventMethod) {
-            for (let i = 0; i < event.data.length; i += 1) {
+          const { event } = record
+          const types = event.typeDef
+          if ((event.section === 'idSpace' || event.section === 'assets') && event.method === eventMethod) {
+            for (let i = 0; i < event.data.length; i++) {
               // All events have a a type 'AccountId'
               if (types[i].type === 'AccountId') {
                 resolve(JSON.parse(event.data.toString()));
@@ -116,7 +116,41 @@ module.exports = class Executor {
             });
             result = false;
           }
-          resolve(result);
+          resolve(result)
+        }
+      })
+    })
+  }
+
+  /**
+   * Execute a batch of transactions.
+   *
+   * @param {object} keypair Sender's keypair
+   * @param {object} batch Transactions batch to execute (Array)
+   * @returns {Promise} result of the Transactions batch
+   */
+  async execBatch (keypair, txs) {
+    return new Promise(async (resolve) => {
+      let result = true
+      this.api.tx.utility.batch(txs).signAndSend(keypair, ({ status, events }) => {
+        debug('Status -> ', this.getStatus(status))
+        events.forEach(({ event: { method, section } }) => debug('Section ', section, 'Method ', method ))
+        if (status.isInBlock || status.isFinalized) {
+          const errors = events.filter(({ event: { method, section } }) =>
+            section === 'system' && method === 'ExtrinsicFailed'
+          )
+          if (errors.length > 0) {
+            errors.forEach(({ event: { data: [error, info] } }) => {
+              if (error.isModule) {
+                const { documentation, method, section } = this.api.registry.findMetaError(error.asModule)
+                console.log(`${section}.${method}: ${documentation.join(' ')}`)
+              } else {
+                console.log('System error found ' + error.toString())
+              }
+            })
+            result = false
+          }
+          resolve(result)
         }
       })
     })
