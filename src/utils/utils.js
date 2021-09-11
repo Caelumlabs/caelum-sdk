@@ -80,13 +80,13 @@ class Utils {
     let pattern = null
     if (str.slice(0, 2) === 'A:') {
       switch (format) {
+        case Formats.STANDARD:
+          str = this.FromDecimalToHex(str)
+          break
         case Formats.HEXADECIMAL:
           str = str.slice(2)
           break
         case Formats.BASE58:
-          str = this.FromBase58ToHex(str)
-          break
-        case Formats.BASE58WITHSEPARATORS:
           str = this.FromBase58ToHex(str)
           break
         case Formats.DECIMAL:
@@ -156,14 +156,14 @@ class Utils {
    */
   static formatHexString (str, format, prefix, sep) {
     switch (format) {
+      case Formats.STANDARD:
+        str = this.DIDFromHexToDecimal(str, prefix, sep)
+        break
       case Formats.HEXADECIMAL:
         str = '' + prefix + sep + str
         break
       case Formats.BASE58:
-        str = this.DIDFromHexToBase58(str, format, prefix, sep)
-        break
-      case Formats.BASE58WITHSEPARATORS:
-        str = this.DIDFromHexToBase58(str, format, prefix, sep)
+        str = this.DIDFromHexToBase58(str, prefix, sep)
         break
       case Formats.DECIMAL:
         str = this.DIDFromHexToDecimal(str, prefix, sep)
@@ -182,18 +182,14 @@ class Utils {
    * Convert a DID from Hexadecimal to Base58
    *
    * @param {object} str DID in hex format
-   * @param {object} format DID format
    * @param {string} prefix prefix for type
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static DIDFromHexToBase58 (str, format, prefix, sep) {
+  static DIDFromHexToBase58 (str, prefix, sep) {
     const s = '' + prefix + sep
     const s1 = this.toBase58(hexToU8a(str))
-    if (format === Formats.BASE58) {
-      return s + s1
-    }
-    return s + this.insertSeparator(s1)
+    return s + this.insertSeparator(this.toBase58(hexToU8a(str)))
   }
 
   /**
@@ -315,7 +311,7 @@ class Utils {
     return new Uint8Array(b)
   }
 
-  static insertSeparator (str, sep = ':') {
+  static insertSeparator (str, sep = '-') {
     let s = ''
     for (let i = 0; i < str.length; i++) {
       if (i !== 0 && i % 4 === 0) {

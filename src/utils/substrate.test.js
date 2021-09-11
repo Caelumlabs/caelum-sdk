@@ -26,7 +26,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   let aliceAddr, tempWallet, tempWallet2, tempWallet3, tempWallet4
   let cid1, cid2, cid3
   let tokenid
-  let format = Formats.DECIMAL
+  let format = Formats.STANDARD
   let prefix = 'A'
   let sep = ':'
   const diddocHash = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
@@ -173,23 +173,23 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     console.log('DID converted =', didConverted)
     let didAgain 
     switch (format) {
+      case Formats.STANDARD:
+        didAgain = Utils.FromDecimalToHex(didConverted)
+        break
       case Formats.HEXADECIMAL:
         didAgain = didConverted.slice(2)
         break
       case Formats.BASE58:
         didAgain = Utils.FromBase58ToHex(didConverted)
         break
-      case Formats.BASE58WITHSEPARATORS:
-        didAgain = Utils.FromBase58ToHex(didConverted)
-        break
       case Formats.DECIMAL:
         didAgain = Utils.FromDecimalToHex(didConverted)
         break
       case Formats.DEFAULT:
-        didAgain = didConverted.slice(2)
+        didAgain = Utils.FromDecimalToHex(didConverted)
         break
       default:
-        didAgain = didConverted.slice(2)
+        didAgain = Utils.FromDecimalToHex(didConverted)
         break
     }
     console.log('DID Again =', didAgain)

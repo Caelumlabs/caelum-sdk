@@ -25,9 +25,9 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   constructor(server) {
     super();
     this.exec = new Executor(server)
-    this.dids = new DID(Formats.DECIMAL)
+    this.dids = new DID(Formats.STANDARD)
     this.gas = new Gas()
-    this.process = new Process(Formats.DECIMAL)
+    this.process = new Process(Formats.STANDARD)
     this.tokens = new Tokens()
     this.classNFTs = new ClassNFTs()
     this.keypair = {}
