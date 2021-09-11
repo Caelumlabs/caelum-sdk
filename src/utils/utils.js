@@ -142,7 +142,7 @@ class Utils {
                   Utils.decimalToHex(s[2].length) +
                   this.stringToU8aHex(s[2]) +
                   Utils.decimalToHex(s[3], 2) +
-                  Utils.decimalToHex(s[4], 2)
+                  s[4]
   }
 
   /**
@@ -207,7 +207,7 @@ class Utils {
   static DIDFromHexToDecimal (str, prefix, sep) {
     const s = '' + prefix + sep
     const { version, networkLength, network, didType, internalDid } = this.structDid(str)
-    return s + parseInt(version, 16) + sep + network + sep + parseInt(didType, 16) + sep + parseInt(internalDid)
+    return s + parseInt(version, 16) + sep + network + sep + parseInt(didType, 16) + sep + internalDid.slice(2)
   }
 
   /**
