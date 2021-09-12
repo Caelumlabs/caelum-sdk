@@ -97,26 +97,6 @@ class Utils {
         }
       }
     }
-    // switch (format) {
-    //   case Formats.STANDARD:
-    //     str = this.FromStandardToHex(str)
-    //     break
-    //   case Formats.HEXADECIMAL:
-    //     str = str.slice(2)
-    //     break
-    //   case Formats.BASE58:
-    //     str = this.FromBase58ToHex(str)
-    //     break
-    //   case Formats.DECIMAL:
-    //     str = this.FromStandardToHex(str)
-    //     break
-    //   case Formats.DEFAULT:
-    //     str = this.FromStandardToHex(str)
-    //     break
-    //   default:
-    //     str = this.FromStandardToHex(str)
-    //     break
-    // }
   
     if (str.slice(0, 2) === '0X') {
       pattern = /[A-F0-9]/gi
