@@ -9,7 +9,7 @@ const { bufferToU8a, stringToU8a, u8aConcat, u8aToHex, hexToU8a, hexToString, st
 const expect = chai.expect
 
 describe('Test Blockchain Substrate Connection and functions', function () {
-  const BlockchainSubstrate = require('../src/index.js')
+  const BlockchainSubstrate = require('../src/substrate.js')
   const Crypto = require('@caelumlabs/crypto')
   const Utils = require('../src/utils')
   const Formats = require('../src/format')
@@ -26,9 +26,9 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   let aliceAddr, tempWallet, tempWallet2, tempWallet3, tempWallet4
   let cid1, cid2, cid3
   let tokenid
-  let format = Formats.STANDARD
-  let prefix = 'A'
-  let sep = ':'
+  const format = Formats.BASE58
+  const prefix = 'A'
+  const sep = ':'
   const diddocHash = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
   const storageAddress = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
   const credential = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
@@ -169,12 +169,13 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     // DID Owner should be the address of tempWallet
     const didDataJson = await blockchain.getDidData(registeredDidEvent[0])
     console.log('DID =', registeredDidEvent[0])
-    const didConverted = Utils.formatHexString(registeredDidEvent[0], format, prefix, sep)
+    const didConverted = Utils.formatHexString(registeredDidEvent[0], blockchain.getDIDFormat().Format, prefix, sep)
     console.log('DID converted =', didConverted)
     let didAgain 
-    switch (format) {
+    console.log('blockchain.getDIDFormat().Format', blockchain.getDIDFormat())
+    switch (blockchain.getDIDFormat().Format) {
       case Formats.STANDARD:
-        didAgain = Utils.FromDecimalToHex(didConverted)
+        didAgain = Utils.FromStandardToHex(didConverted)
         break
       case Formats.HEXADECIMAL:
         didAgain = didConverted.slice(2)
@@ -183,13 +184,13 @@ describe('Test Blockchain Substrate Connection and functions', function () {
         didAgain = Utils.FromBase58ToHex(didConverted)
         break
       case Formats.DECIMAL:
-        didAgain = Utils.FromDecimalToHex(didConverted)
+        didAgain = Utils.FromStandardToHex(didConverted)
         break
       case Formats.DEFAULT:
-        didAgain = Utils.FromDecimalToHex(didConverted)
+        didAgain = Utils.FromStandardToHex(didConverted)
         break
       default:
-        didAgain = Utils.FromDecimalToHex(didConverted)
+        didAgain = Utils.FromStandardToHex(didConverted)
         break
     }
     console.log('DID Again =', didAgain)
@@ -271,13 +272,13 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     const tempWalletDid2 = await blockchain.getDidFromOwner(tempWallet2.address)
     // Change only Name
     const infoName = { name: 'NewName' }
-    let result = await blockchain.updateInfo(tempWalletDid2, infoName)
+    let result = await blockchain.changeInfo(tempWalletDid2, infoName)
     expect(result).equal(true)
     let didData = await blockchain.getDidData(tempWalletDid2)
     expect(hexToString(didData.info.name)).equal(infoName.name)
     // Change City and Country Code. Name will stay unchanged
     const infoCityAndCountry = { city: 'Barcelona', countryCode: 'ES' }
-    result = await blockchain.updateInfo(tempWalletDid2, infoCityAndCountry)
+    result = await blockchain.changeInfo(tempWalletDid2, infoCityAndCountry)
     expect(result).equal(true)
     didData = await blockchain.getDidData(tempWalletDid2)
     expect(hexToString(didData.info.name)).equal(infoName.name)
@@ -352,7 +353,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
     // DID must be DID of the Owner because has not been provided
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
-    expect(Utils.formatHexString(registeredCidEvent[2], format, prefix, sep)).equal(didPromoter)
+    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, sep)).equal(didPromoter)
   })
 
   it('Should add three new Certificates to Blockchain', async () => {
@@ -390,7 +391,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
     // DID must be DID of the Owner
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
-    expect(Utils.formatHexString(registeredCidEvent[2], format, prefix, sep)).equal(didPromoter)
+    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, sep)).equal(didPromoter)
     // See result
     const res = await blockchain.getCertificatesByDID(didPromoter)
     if (res.length > 0) {
@@ -468,7 +469,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     const tempWalletDid = await blockchain.getDidFromOwner(tempWallet.address)
     await blockchain.removeDid(tempWalletDid)
     const subs = await blockchain.wait4Event('DidRemoved')
-    expect(Utils.formatHexString(subs[1]), format, prefix, sep).eql(tempWalletDid)
+    expect(Utils.formatHexString(subs[1], blockchain.getDIDFormat().Format, prefix, sep).eql(tempWalletDid))
   })
 
   it.skip('Should sweep Gas from Zelda to Alice', async () => {
@@ -714,6 +715,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     const zeldaAddress = blockchain.getAddress(zeldaMnemonic)
     // Ensure DID before is owner by tempWallet
     const didDataBefore = await blockchain.getDidData(tempWalletDid)
+    console.log('DID Data before', didDataBefore)
     expect(didDataBefore.owner).eql(tempWallet.address)
     // Get the initial gas balance of the sender account
     const tempWalletBalance1 = await blockchain.addrState(tempWallet.address)
@@ -726,7 +728,9 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
     console.log('Result = ', await blockchain.transferDidOwnershipGasAndTokens(tempWalletDid, zeldaAddress, tokenid))
 
+    const didDataAfter= await blockchain.getDidData(tempWalletDid)
     console.log('DID Data after', await blockchain.getDidData(tempWalletDid))
+    expect(didDataAfter.owner).eql(zeldaAddress)
     const tempWalletBalance2 = await blockchain.addrState(tempWallet.address)
     console.log('Temp Wallet Balance after ', BigInt(tempWalletBalance2.balance.free))
     console.log('Temp Wallet token data after ',await blockchain.getAccountTokenData(tokenid, tempWallet.address))

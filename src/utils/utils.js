@@ -78,32 +78,46 @@ class Utils {
       format = Formats.DEFAULT
     }
     let pattern = null
-    if (str.slice(0, 2) === 'A:') {
-      switch (format) {
-        case Formats.STANDARD:
-          str = this.FromDecimalToHex(str)
-          break
-        case Formats.HEXADECIMAL:
-          str = str.slice(2)
-          break
-        case Formats.BASE58:
-          str = this.FromBase58ToHex(str)
-          break
-        case Formats.DECIMAL:
-          str = this.FromDecimalToHex(str)
-          break
-        case Formats.DEFAULT:
-          str = this.FromDecimalToHex(str)
-          break
-        default:
-          str = this.FromDecimalToHex(str)
-          break
-      }
+    if (str.slice(0, 2) === 'B:' || str.slice(0, 2) === 'C:') {
+      str = str.slice(2)
     } else {
-      if (str.slice(0, 2) === 'B:' || str.slice(0, 2) === 'C:') {
-        str = str.slice(2)
+      if (str.slice(0, 2) === 'A:') {
+        if (str.slice(2).startsWith('0x')) {
+          str = str.slice(2)
+        } else {
+          if (str.slice(2).includes(':')) {
+            str = this.FromStandardToHex(str)
+          } else {
+            if (str.slice(2).includes('-')) {
+              str = this.FromBase58ToHex(str)
+            } else {
+              str = this.FromStandardToHex(str)
+            }
+          }
+        }
       }
     }
+    // switch (format) {
+    //   case Formats.STANDARD:
+    //     str = this.FromStandardToHex(str)
+    //     break
+    //   case Formats.HEXADECIMAL:
+    //     str = str.slice(2)
+    //     break
+    //   case Formats.BASE58:
+    //     str = this.FromBase58ToHex(str)
+    //     break
+    //   case Formats.DECIMAL:
+    //     str = this.FromStandardToHex(str)
+    //     break
+    //   case Formats.DEFAULT:
+    //     str = this.FromStandardToHex(str)
+    //     break
+    //   default:
+    //     str = this.FromStandardToHex(str)
+    //     break
+    // }
+  
     if (str.slice(0, 2) === '0X') {
       pattern = /[A-F0-9]/gi
     } else {
@@ -130,13 +144,13 @@ class Utils {
   }
 
   /**
-   * Convert any DID or CID from Decimal to Hexadecimal
+   * Convert any DID or CID from Standard to Hexadecimal
    *
    * @param {object} str DID in decimal format
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static FromDecimalToHex (str, sep) {
+  static FromStandardToHex (str, sep) {
     const s = str.split(':')
     return '0x' + Utils.decimalToHex(s[1], 2) +
                   Utils.decimalToHex(s[2].length) +
@@ -157,7 +171,7 @@ class Utils {
   static formatHexString (str, format, prefix, sep) {
     switch (format) {
       case Formats.STANDARD:
-        str = this.DIDFromHexToDecimal(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, sep)
         break
       case Formats.HEXADECIMAL:
         str = '' + prefix + sep + str
@@ -166,13 +180,13 @@ class Utils {
         str = this.DIDFromHexToBase58(str, prefix, sep)
         break
       case Formats.DECIMAL:
-        str = this.DIDFromHexToDecimal(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, sep)
         break
       case Formats.DEFAULT:
-        str = this.DIDFromHexToDecimal(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, sep)
         break
       default:
-        str = this.DIDFromHexToDecimal(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, sep)
         break
     }
     return str
@@ -200,7 +214,7 @@ class Utils {
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static DIDFromHexToDecimal (str, prefix, sep) {
+  static DIDFromHexToStandard (str, prefix, sep) {
     const s = '' + prefix + sep
     const { version, networkLength, network, didType, internalDid } = this.structDid(str)
     return s + parseInt(version, 16) + sep + network + sep + parseInt(didType, 16) + sep + internalDid.slice(2)

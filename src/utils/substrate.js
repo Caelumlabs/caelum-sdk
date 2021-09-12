@@ -109,6 +109,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   /**
    * New Blockchain KeyPair.
    *
+   * @param {string} _mnemonic Seed (12, 15, 24-digit mnemonic, or //Alice)
    * @returns {object} Key pair
    */
   async newKeys(_mnemonic = false) {
@@ -126,7 +127,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
         keyPair: keyring.getPair(pair.address),
       });
     }
-	return false;
+    return false;
   }
 
   // The following functions deal with native blockchain gas tokens
@@ -1810,14 +1811,13 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   async wait4Event(eventMethod) {
     return this.exec.wait4Event(eventMethod);
   }
-  
-    /**
+
+  /**
    * Sets a format for all types of ubscribe to register events
    *
    * @param {string} format Format to set
-   * @returns {Promise} Result of the transaction
    */
-  async setFormat (format) {
+  setFormat (format) {
     this.dids.setFormat(format)
     this.process.setFormat(format)
     this.tokens.setFormat(format)
@@ -1827,9 +1827,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * Sets a format for DIDs
    *
    * @param {string} format Format to set
-   * @returns {Promise} Result of the transaction
    */
-  async setDIDFormat (format) {
+  setDIDFormat (format) {
     this.dids.setFormat(format)
   }
 
@@ -1837,19 +1836,35 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * Sets a format for Process
    *
    * @param {string} format Format to set
-   * @returns {Promise} Result of the transaction
    */
-  async setProcessFormat (format) {
+  setProcessFormat (format) {
     this.process.setFormat(format)
   }
-  
+
   /**
    * Sets a format for Tokens
    *
    * @param {string} format Format to set
-   * @returns {Promise} Result of the transaction
    */
-  async setTokenFormat (format) {
+  setTokenFormat (format) {
     this.tokens.setFormat(format)
+  }
+
+  /**
+   * Get the actual format of DIDs 
+   *
+   * @returns {object} Formast and Separators
+   */
+  getDIDFormat () {
+    return this.dids.getDIDFormat()
+  }
+
+  /**
+   * Get the actual format of CIDs 
+   *
+   * @returns {object} Formast and Separators
+   */
+  getCIDFormat () {
+    return this.dids.getCIDFormat()
   }
 };

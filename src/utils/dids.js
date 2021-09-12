@@ -20,6 +20,7 @@ module.exports = class DIDs {
     this.format = format
     this.DIDPrefix = 'A'
     this.DIDSep = ':'
+    this.CIDFormat = format
     this.CIDPrefix = 'B'
     this.CIDSep = ':'
   }
@@ -28,10 +29,36 @@ module.exports = class DIDs {
    * Sets a format 
    *
    * @param {string} format Format to set
+   */
+  setFormat (format) {
+    this.format = format
+    this.CIDFormat = format
+  }
+
+  /**
+   * Get the actual format of DIDs 
+   *
    * @returns {Promise} Result of the transaction
    */
-  async setFormat (format) {
-    this.format = format
+  getDIDFormat () {
+    return {
+      Format: this.format,
+      Prefix: this.DIDPrefix,
+      Separator: this.DIDSep,
+    }
+  }
+
+  /**
+   * Get the actual format of DIDs 
+   *
+   * @returns {Promise} Result of the transaction
+   */
+  getCIDFormat () {
+    return {
+      Format: this.format,
+      Prefix: this.CIDPrefix,
+      Sep: this.CIDSep
+    }
   }
 
   /**
