@@ -97,7 +97,7 @@ class Utils {
         }
       }
     }
-  
+
     if (str.slice(0, 2) === '0X') {
       pattern = /[A-F0-9]/gi
     } else {
@@ -315,7 +315,7 @@ class Utils {
     }
     return s
   }
-  
+
   /**
    * Destructure DID into its components as version.
    *
