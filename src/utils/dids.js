@@ -15,50 +15,15 @@ module.exports = class DIDs {
    * Constructor
    *
    * @param {string} format Format presentation for DIDs
+   * @param {string} method Format presentation for DIDs
    */
-  constructor (format) {
-    this.format = format
+  constructor (format, method = 'caelum') {
+    this.DIDMethod = method
+    this.DIDformat = format
     this.DIDPrefix = 'A'
-    this.DIDSep = ':'
+    this.CIDMethod = method
     this.CIDFormat = format
-    this.CIDPrefix = 'B'
-    this.CIDSep = ':'
-  }
-
-  /**
-   * Sets a format 
-   *
-   * @param {string} format Format to set
-   */
-  setFormat (format) {
-    this.format = format
-    this.CIDFormat = format
-  }
-
-  /**
-   * Get the actual format of DIDs 
-   *
-   * @returns {Promise} Result of the transaction
-   */
-  getDIDFormat () {
-    return {
-      Format: this.format,
-      Prefix: this.DIDPrefix,
-      Separator: this.DIDSep,
-    }
-  }
-
-  /**
-   * Get the actual format of DIDs 
-   *
-   * @returns {Promise} Result of the transaction
-   */
-  getCIDFormat () {
-    return {
-      Format: this.format,
-      Prefix: this.CIDPrefix,
-      Sep: this.CIDSep
-    }
+    this.CIDPrefix = 'C'
   }
 
   /**
@@ -68,13 +33,12 @@ module.exports = class DIDs {
    * @param {object} keypair Account's keypair
    * @param {string} accountTo Account to assign DID
    * @param {number} level Level to assign
-   * @param {number} didType DID type
    * @param {string} legalName Organization's legal name
    * @param {string} taxId Organization's tax id
    * @returns {Promise} of transaction
    */
-  async registerDid(exec, keypair, accountTo, level, didType, legalName, taxId) {
-    const transaction = await exec.api.tx.idSpace.registerDid(accountTo, level, didType, legalName, taxId);
+  async registerDid(exec, keypair, accountTo, level, legalName, taxId) {
+    const transaction = await exec.api.tx.idSpace.registerDid(accountTo, level, legalName, taxId);
     return await exec.execTransaction(keypair, transaction);
   }
 
@@ -89,7 +53,7 @@ module.exports = class DIDs {
    */
   async setStorageAddress (exec, keypair, did, storageAddress) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -116,7 +80,7 @@ module.exports = class DIDs {
       did = u8aToHex('\x00')
     } else {
       // Check if DID is wellformed
-      did = Utils.verifyHexString(did, this.format)
+      did = Utils.verifyDIDString(did, this.DIDFormat)
       if (did === false) {
         return false
       }
@@ -139,7 +103,7 @@ module.exports = class DIDs {
    */
   async changeOwner (exec, keypair, did, newOwner) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -160,7 +124,7 @@ module.exports = class DIDs {
    */
   async putHash (exec, keypair, did, credential, certificate, typ) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -181,7 +145,7 @@ module.exports = class DIDs {
    */
   async changeLegalNameOrTaxId (exec, keypair, did, legalName, taxId) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -218,7 +182,7 @@ module.exports = class DIDs {
     if (website === null) { website = '0x00' }
     if (endpoint === null) { endpoint = '0x00' }
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -237,7 +201,7 @@ module.exports = class DIDs {
    */
   async revokeHash (exec, keypair, did, credential) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -255,7 +219,7 @@ module.exports = class DIDs {
    */
   async removeDid (exec, keypair, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -272,14 +236,14 @@ module.exports = class DIDs {
    */
   async getDidData (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
     const { internalDid } = Utils.structDid(did)
     let didData = await exec.api.query.idSpace.didData(internalDid)
     didData = JSON.parse(didData)
-    didData.did_promoter = Utils.formatHexString(didData.did_promoter, this.format, this.DIDPrefix, this.DIDSep)
+    didData.did_promoter = Utils.formatHexString(didData.did_promoter, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
     return didData
   }
 
@@ -294,12 +258,12 @@ module.exports = class DIDs {
     const didData = allDidData
       .map((v) => {
         const data = JSON.parse(v[1])
-        data.did_promoter = Utils.formatHexString(data.did_promoter, this.format, this.DIDPrefix, this.DIDSep)
+        data.did_promoter = Utils.formatHexString(data.did_promoter, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
         const did = '0x' + Utils.decimalToHex(data.did_version, 2) +
-                           Utils.decimalToHex(data.network_id, 4) +
-                           Utils.decimalToHex(data.did_type, 2) +
+                           Utils.decimalToHex(data.network_id.length, 2) +
+                           u8aToHex(data.network_id) +
                            u8aToHex(v[0]).slice(100)
-        return { did: Utils.formatHexString(did, this.format, this.DIDPrefix, this.DIDSep), data: data }
+        return { did: Utils.formatHexString(did, this.DIDFormat, this.DIDPrefix, this.DIDMethod), data: data }
       })
     return didData
   }
@@ -313,7 +277,7 @@ module.exports = class DIDs {
    */
   async getOwnerFromDid (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -330,7 +294,7 @@ module.exports = class DIDs {
    */
   async getDidFromOwner (exec, owner) {
     const did = await exec.api.query.idSpace.didFromOwner(owner)
-    return Utils.formatHexString(u8aToHex(did), this.format, this.DIDPrefix, this.DIDSep)
+    return Utils.formatHexString(u8aToHex(did), this.DIDFormat, this.DIDPrefix, this.DIDMethod)
   }
 
   /**
@@ -348,7 +312,7 @@ module.exports = class DIDs {
       did = this.getDidFromOwner(exec, this.keypair.address)
     }
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -371,7 +335,7 @@ module.exports = class DIDs {
       did = this.getDidFromOwner(exec, this.keypair.address)
     }
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -389,7 +353,7 @@ module.exports = class DIDs {
    */
   async getStorageAddressHash (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -427,7 +391,7 @@ module.exports = class DIDs {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
     } else {
-      did = Utils.verifyHexString(did, this.format)
+      did = Utils.verifyDIDString(did, this.DIDFormat)
       if (did === false) {
         return false
       }
@@ -451,7 +415,7 @@ module.exports = class DIDs {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
     } else {
-      did = Utils.verifyHexString(did, this.format)
+      did = Utils.verifyDIDString(did, this.DIDFormat)
       if (did === false) {
         return false
       }
@@ -509,7 +473,7 @@ module.exports = class DIDs {
    */
   async getCertificateByKey (exec, cid) {
     // Check if Certificate is wellformed
-    if (Utils.verifyHexString(cid, this.format) === false) {
+    if (Utils.verifyDIDString(cid, this.DIDFormat) === false) {
       return false
     }
     return await exec.api.query.idSpace.certificates(cid)
@@ -526,7 +490,7 @@ module.exports = class DIDs {
    */
   async getCertificatesByDID (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -536,7 +500,7 @@ module.exports = class DIDs {
         const data = JSON.parse(v[1])
         if (data.did_owner === did && data.timepoint_valid_to.height === 0) {
           const cid = '0x' + u8aToHex(v[0]).slice(100)
-          data.did_owner = Utils.formatHexString(data.did_owner, this.format, this.DIDPrefix, this.DIDSep)
+          data.did_owner = Utils.formatHexString(data.did_owner, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
           return { certificate: cid, data: data }
         }
         return null
@@ -554,13 +518,24 @@ module.exports = class DIDs {
    */
   async getHash (exec, hash) {
     // Check if Credential/Hash wellformed
-    hash = Utils.verifyHexString(hash, this.format)
+    hash = Utils.verifyDIDString(hash, this.DIDFormat)
     if (hash === false) {
       return false
     }
     const hashData = JSON.parse(await exec.api.query.idSpace.hashes(hash))
-    hashData.did = Utils.formatHexString(hashData.did, this.format, this.DIDPrefix, this.DIDSep)
+    hashData.did = Utils.formatHexString(hashData.did, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
     return hashData
+  }
+
+  /**
+   * Get tha network name.
+   *
+   * @param {object} exec Executor class.
+   * @returns {string} network name
+   */
+  async getNetworkName (exec) {
+    const network = JSON.parse(await exec.api.query.idSpace.caelumNetworkId())
+    return network
   }
 
   /**
@@ -572,7 +547,7 @@ module.exports = class DIDs {
    */
   async getAllHashesForDid (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -589,7 +564,7 @@ module.exports = class DIDs {
     hashes = await Promise.all(hashes)
     return hashes.map((h) => {
       h.data = JSON.parse(h.data)
-      h.data.did = Utils.formatHexString(h.data.did, this.format, this.DIDPrefix, this.DIDSep)
+      h.data.did = Utils.formatHexString(h.data.did, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
       return { hash: u8aToHex(h.hash), data: h.data }
     })
   }
@@ -615,7 +590,7 @@ module.exports = class DIDs {
 
   async transferDidOwnershipGasAndTokens (exec, keypair, did, newOwner, tokenId, gasAmount, tokenAmount) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -676,14 +651,102 @@ module.exports = class DIDs {
   }
 
   /**
-   * Set the representation format for DIDs.
+   * Sets a format 
    *
-   * @param {string} format DID format
-   * @returns {object} old format
+   * @param {string} format Format to set
    */
-  setDidFormat (format) {
-    const oldFormat = this.format
-    this.format = format
-    return oldFormat
+  setFormat (format) {
+    this.DIDFormat = format
+    this.CIDFormat = format
+  }
+
+  /**
+   * Sets a format 
+   *
+   * @param {string} format Format to set
+   */
+  setDIDFormat (format) {
+    this.DIDFormat = format
+  }
+
+  /**
+   * Sets a format 
+   *
+   * @param {string} format Format to set
+   */
+  setCIDFormat (format) {
+    this.CIDFormat = format
+  }
+
+  /**
+   * Sets a method 
+   *
+   * @param {string} method Method to set
+   */
+  setMethod (method) {
+    this.DIDMethod = method
+    this.CIDMethod = method
+  }
+
+  /**
+   * Sets a Method 
+   *
+   * @param {string} method Method to set
+   */
+  setDIDMethod (method) {
+    this.DIDMethod = method
+  }
+
+  /**
+   * Sets a method 
+   *
+   * @param {string} method Method to set
+   */
+  setCIDMethod (method) {
+    this.CIDMethod = method
+  }
+
+  /**
+   * Get the actual format of DIDs 
+   *
+   * @returns {string} Result of the transaction
+   */
+  getDIDFormat () {
+    return {
+      Format: this.DIDFormat,
+      Prefix: this.DIDPrefix,
+      Method: this.DIDMethod
+    }
+  }
+
+  /**
+   * Get the actual format of DIDs 
+   *
+   * @returns {string} Result of the transaction
+   */
+  getCIDFormat () {
+    return {
+      Format: this.CIDFormat,
+      Prefix: this.CIDPrefix,
+      Method: this.CIDMethod
+    }
+  }
+
+  /**
+   * Get the actual method of DIDs 
+   *
+   * @returns {string} Result of the transaction
+   */
+  getDIDMethod () {
+    return this.DIDMethod
+  }
+
+  /**
+   * Get the actual method of CIDs 
+   *
+   * @returns {string} Result of the transaction
+   */
+  getCIDMethod () {
+    return this.CIDMethod
   }
 }

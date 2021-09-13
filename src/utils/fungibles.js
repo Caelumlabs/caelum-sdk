@@ -14,23 +14,35 @@ module.exports = class Token {
    * Constructor
    *
    * @param {string} format Format presentation for DIDs
+   * @param {string} method Method for DIDs
    */
-  constructor (format) {
-    this.format = format
-    this.DIDPrefix = 'A'
-    this.DIDSep = ':'
-    this.CIDPrefix = 'B'
-    this.CIDSep = ':'
+  constructor (format, method = 'caelum') {
+    this.Format = format
+    this.Prefix = 'T'
+    this.Method = method
+    this.network = ''
   }
 
   /**
    * Sets a format 
    *
    * @param {string} format Format to set
-   * @returns {Promise} Result of the transaction
    */
-  async setFormat (format) {
-    this.format = format
+  setFormat (format) {
+    this.Format = format
+  }
+
+  /**
+   * Get the format 
+   *
+   * @returns {object} Result of the transaction
+   */
+  getFormat () {
+    return {
+      Format: this.Format,
+      Prefix: this.Prefix,
+      Method: this.Method
+    }
   }
 
   /**
@@ -40,7 +52,6 @@ module.exports = class Token {
    * Funds of sender are reserved by `TokenDeposit`.
    *
    * Parameters:
-   * - `id`: The identifier of the new token. This must not be currently in use to identify an existing token.
    * - `admin`: The admin of this class of tokens. The admin is the initial address of each member of the token class's admin team.
    * - `minBalance`: The minimum balance of this new token that any single account must have. 
    *    If an account's balance is reduced below this, then it collapses to zero.
@@ -79,6 +90,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceCreateToken(exec, keypair, id, owner, isSufficient, minBalance) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.forceCreate(id, owner, isSufficient, minBalance);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -99,6 +115,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async destroyToken(exec, keypair, id, witness) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.destroy(id, witness);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -118,6 +139,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async mintToken(exec, keypair, id, beneficiary, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.mint(id, beneficiary, amount);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -141,6 +167,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async burnToken(exec, keypair, id, who, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.burn(id, who, amount);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -166,6 +197,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferToken(exec, keypair, id, target, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.transfer(id, target, amount);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -190,6 +226,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferTokenKeepAlive(exec, keypair, id, target, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.transferKeepAlive(id, target, amount);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -217,6 +258,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceTransferToken(exec, keypair, id, source, dest, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.forceTransfer(id, source, dest, amount);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -235,6 +281,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async freezeAccountForToken(exec, keypair, id, who) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.freeze(id, who);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -253,6 +304,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async unfreezeAccountForToken(exec, keypair, id, who) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.thaw(id, who);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -269,6 +325,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async freezeToken(exec, keypair, id) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.freezeToken(id);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -285,6 +346,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async unfreezeToken(exec, keypair, id) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.thawToken(id);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -303,6 +369,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferTokenOwnership(exec, keypair, id, owner) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.transferOwnership(id, owner);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -325,6 +396,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async setTokenTeam(exec, keypair, id, issuer, admin, freezer) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.setTeam(id, issuer, admin, freezer);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -351,6 +427,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async setTokenMetadata(exec, keypair, id, name, symbol, decimals) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.setMetadata(id, name, symbol, decimals);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -369,6 +450,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async clearTokenMetadata(exec, keypair, id) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.clearMetadata(id);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -393,6 +479,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceSetTokenMetadata(exec, keypair, id, name, symbol, decimals, isFrozen) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.forceSetMetadata(id, name, symbol, decimals, isFrozen);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -410,6 +501,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceClearTokenMetadata(exec, keypair, id) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.forceClearMetadata(id);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -445,6 +541,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceTokenStatus(exec, keypair, id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.forceTokenStatus(id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -473,6 +574,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async approveTokenTransfer(exec, keypair, id, delegate, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.approveTransfer(id, delegate, amount);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -494,6 +600,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async cancelApprovalTokenTransfer(exec, keypair, id, delegate) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.cancelApproval(id, delegate);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -516,6 +627,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceCancelApprovalTokenTransfer(exec, keypair, id, owner, delegate) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.forceCancelApproval(id, owner, delegate);
     return await exec.execTransaction(keypair, transaction);
   }
@@ -544,6 +660,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferTokenApproval (exec, keypair, id, owner, destination, amount) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const transaction = await exec.api.tx.assets.transferApproved(id, owner, destination, amount)
     return await exec.execTransaction(keypair, transaction)
   } 
@@ -580,6 +701,11 @@ module.exports = class Token {
    * @returns {Promise} of Transaction
    */
   async getTokenDetails(exec, id) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const tokenDetails = await exec.api.query.assets.asset(id);
     return JSON.parse(tokenDetails);
   }
@@ -592,6 +718,11 @@ module.exports = class Token {
    * @returns {Promise} of Transaction
    */
   async getTokenMetadata(exec, id) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const metadata = await exec.api.query.assets.metadata(id);
     return JSON.parse(metadata);
   }
@@ -605,6 +736,11 @@ module.exports = class Token {
    * @returns {Promise} of Transaction
    */
   async getAccountTokenData(exec, id, who) {
+    // Check if token id is wellformed
+    id = Utils.verifyTokenFormat(id, this.format)
+    if (id === false) {
+      return false
+    }
     const accountData = await exec.api.query.assets.account(id, who);
     return JSON.parse(accountData);
   }

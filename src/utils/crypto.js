@@ -179,6 +179,7 @@ module.exports = class Crypto {
    *
    * @param {string} password Password to encrypt the message
    * @param {string} obj Message to be encrypted
+   * @param {boolean} stringify Stringify ??
    * @returns {Promise} Return a promise with the execution of the encryption.
    */
   static encryptObj(password, obj, stringify = true) {
