@@ -84,7 +84,7 @@ module.exports = {
     DIDData: {
       release: 'IdSpaceReleases',
       did_version: 'u8',
-      network_id: 'u16',
+      network_id: 'Vec<u8>',
       did_type: 'u8',
       owner: 'AccountId',
       did_promoter: 'Vec<u8>',
@@ -154,6 +154,14 @@ module.exports = {
       children: 'Option<Vec<Vec<u8>>>',
       created_block: 'Timepoint',
       valid_until: 'Timepoint'
+    },
+    MultisigAccount: {
+      members: 'Vec<AccountId>',
+      threshold: 'u16',
+      creator: 'AccountId',
+      is_frozen: 'bool',
+      valid_from: 'Timepoint<BlockNumber>',
+      valid_to: 'Timepoint<BlockNumber>'
     },
     SuspensionJudgement: {
       _enum: [

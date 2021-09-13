@@ -11,6 +11,7 @@ const Gas = require('./gas');
 const Process = require('./process');
 const Tokens = require('./fungibles');
 const ClassNFTs = require('./classnfts');
+const Formats = require('./format');
 
 /**
  * Javascript Class to interact with the Blockchain.
@@ -23,14 +24,13 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    */
   constructor(server) {
     super();
-    // Initialize all needed classes
-    this.exec = new Executor(server);
-    this.dids = new DID();
-    this.gas = new Gas();
-    this.process = new Process();
-    this.tokens = new Tokens();
-    this.classNFTs = new ClassNFTs();
-    this.keypair = {};
+    this.exec = new Executor(server)
+    this.dids = new DID(Formats.STANDARD)
+    this.gas = new Gas()
+    this.process = new Process(Formats.STANDARD)
+    this.tokens = new Tokens()
+    this.classNFTs = new ClassNFTs()
+    this.keypair = {}
   }
 
   // Blockchain execution related functions
@@ -109,6 +109,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   /**
    * New Blockchain KeyPair.
    *
+   * @param {string} _mnemonic Seed (12, 15, 24-digit mnemonic, or //Alice)
    * @returns {object} Key pair
    */
   async newKeys(_mnemonic = false) {
@@ -126,7 +127,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
         keyPair: keyring.getPair(pair.address),
       });
     }
-	return false;
+    return false;
   }
 
   // The following functions deal with native blockchain gas tokens
@@ -421,7 +422,6 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * DID to assign the CID. By default is Null and the Certificate ID
    * will be assigned to the DID of the sender transaction account
    *
-   * @param {string} cid CID
    * @param {string} title Certicate's title
    * @param {string} urlCertificate Certificate's URL
    * @param {string} urlImage Certificate's URL image
@@ -590,7 +590,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
-   * Set the Token ID and cost for processes.
+   * Set the same Token ID and cost for processes.
    *
    * @param {number} tokenid Token's Id
    * @param {number} cost Cost to be burned by process node
@@ -696,18 +696,16 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * Funds of sender are reserved by `TokenDeposit`.
    *
    * Parameters:
-   * - `id`: The identifier of the new token. This must not be currently in use to identify an existing token.
    * - `admin`: The admin of this class of tokens. The admin is the initial address of each member of the token class's admin team.
    * - `minBalance`: The minimum balance of this new token that any single account must have.
    *    If an account's balance is reduced below this, then it collapses to zero.
    *
-   * @param {number} id The identifier of the new token.
    * @param {object} admin The admin of this class of tokens.
    * @param {number} minBalance The minimum balance.
    * @returns {Promise} of transaction
    */
-  async createToken (id, admin, minBalance = 0) {
-    return this.tokens.createToken(this.exec, this.keypair, id, admin, minBalance)
+  async createToken (admin, minBalance = 0) {
+    return this.tokens.createToken(this.exec, this.keypair, admin, minBalance)
   }
 
   /**
@@ -1812,5 +1810,61 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    */
   async wait4Event(eventMethod) {
     return this.exec.wait4Event(eventMethod);
+  }
+
+  /**
+   * Sets a format for all types of ubscribe to register events
+   *
+   * @param {string} format Format to set
+   */
+  setFormat (format) {
+    this.dids.setFormat(format)
+    this.process.setFormat(format)
+    this.tokens.setFormat(format)
+  }
+
+  /**
+   * Sets a format for DIDs
+   *
+   * @param {string} format Format to set
+   */
+  setDIDFormat (format) {
+    this.dids.setFormat(format)
+  }
+
+  /**
+   * Sets a format for Process
+   *
+   * @param {string} format Format to set
+   */
+  setProcessFormat (format) {
+    this.process.setFormat(format)
+  }
+
+  /**
+   * Sets a format for Tokens
+   *
+   * @param {string} format Format to set
+   */
+  setTokenFormat (format) {
+    this.tokens.setFormat(format)
+  }
+
+  /**
+   * Get the actual format of DIDs 
+   *
+   * @returns {object} Formast and Separators
+   */
+  getDIDFormat () {
+    return this.dids.getDIDFormat()
+  }
+
+  /**
+   * Get the actual format of CIDs 
+   *
+   * @returns {object} Formast and Separators
+   */
+  getCIDFormat () {
+    return this.dids.getCIDFormat()
   }
 };
