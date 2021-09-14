@@ -47,7 +47,7 @@ module.exports = class Organization {
 
   async registerOrganization(legalName, taxId, level, keys, tokenId, amount) {
     debug(`registerOrg - ${legalName}`);
-    await this.blockchain.registerDid(keys.address, level, 2, legalName, taxId);
+    await this.blockchain.registerDid(keys.address, level, legalName, taxId);
     await this.blockchain.wait4Event('DidRegistered');
     const did = await this.blockchain.getDidFromOwner(keys.address);
     debug(`DID = ${did}`);
