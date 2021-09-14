@@ -128,6 +128,11 @@ module.exports = class DIDs {
     if (did === false) {
       return false
     }
+    // Check if CID is wellformed
+    certificate = Utils.verifyDIDString(certificate, this.CIDFormat)
+    if (certificate === false) {
+      return false
+    }
     const transaction = await exec.api.tx.idSpace.putHash(did, credential, certificate, typ)
     return await exec.execTransaction(keypair, transaction)
   }
@@ -260,8 +265,8 @@ module.exports = class DIDs {
         const data = JSON.parse(v[1])
         data.did_promoter = Utils.formatHexString(data.did_promoter, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
         const did = '0x' + Utils.decimalToHex(data.did_version, 2) +
-                           Utils.decimalToHex(data.network_id.length, 2) +
-                           u8aToHex(data.network_id) +
+                           Utils.decimalToHex((data.network_id.length / 2) - 1, 2) +
+                           data.network_id.slice(2) +
                            u8aToHex(v[0]).slice(100)
         return { did: Utils.formatHexString(did, this.DIDFormat, this.DIDPrefix, this.DIDMethod), data: data }
       })
@@ -420,6 +425,11 @@ module.exports = class DIDs {
         return false
       }
     }
+    // Check if CID is wellformed
+    cid = Utils.verifyDIDString(cid, this.CIDFormat)
+    if (cid === false) {
+      return false
+    }
     const transaction = await exec.api.tx.idSpace.revokeCertificate(cid, did)
     return await exec.execTransaction(keypair, transaction)
   }
@@ -436,8 +446,12 @@ module.exports = class DIDs {
     const cids = allCids
       .map((v) => {
         const data = JSON.parse(v[1])
-        const cid = '0x' + u8aToHex(v[0]).slice(100)
-        return { certificate: cid, data: data }
+        data.did_owner = Utils.formatHexString(data.did_owner, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
+        const cid = '0x' + Utils.decimalToHex(data.cid_version, 2) +
+                           Utils.decimalToHex((data.network_id.length / 2) - 1, 2) +
+                           data.network_id.slice(2) +
+                           u8aToHex(v[0]).slice(100)
+        return { certificate: Utils.formatHexString(cid, this.CIDFormat, this.CIDPrefix, this.CIDMethod), data: data }
       })
     return cids
   }
@@ -455,10 +469,17 @@ module.exports = class DIDs {
       .map((v) => {
         const data = JSON.parse(v[1])
         if (data.timepoint_valid_to.height === 0) {
-          const cid = '0x' + u8aToHex(v[0]).slice(100)
-          return { certificate: cid, data: data }
+          const data = JSON.parse(v[1])
+          data.did_owner = Utils.formatHexString(data.did_owner, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
+          const cid = '0x' + Utils.decimalToHex(data.cid_version, 2) +
+                           Utils.decimalToHex((data.network_id.length / 2) - 1, 2) +
+                           data.network_id.slice(2) +
+                           u8aToHex(v[0]).slice(100)
+          return { certificate: Utils.formatHexString(cid, this.CIDFormat, this.CIDPrefix, this.CIDMethod), data: data }
         }
+        return null
       })
+    cids = cids.filter(d => d !== null)
     return cids
   }
 
@@ -473,10 +494,11 @@ module.exports = class DIDs {
    */
   async getCertificateByKey (exec, cid) {
     // Check if Certificate is wellformed
-    if (Utils.verifyDIDString(cid, this.DIDFormat) === false) {
+    if (Utils.verifyDIDString(cid, this.CIDFormat) === false) {
       return false
     }
-    return await exec.api.query.idSpace.certificates(cid)
+    const { internalDid } = Utils.structDid(cid)
+    return await exec.api.query.idSpace.certificates(internalDid)
   }
 
   /**
@@ -499,9 +521,12 @@ module.exports = class DIDs {
       .map((v) => {
         const data = JSON.parse(v[1])
         if (data.did_owner === did && data.timepoint_valid_to.height === 0) {
-          const cid = '0x' + u8aToHex(v[0]).slice(100)
+          const cid = '0x' + Utils.decimalToHex(data.cid_version, 2) +
+                           Utils.decimalToHex((data.network_id.length / 2) - 1, 2) +
+                           data.network_id.slice(2) +
+                           u8aToHex(v[0]).slice(100)
           data.did_owner = Utils.formatHexString(data.did_owner, this.DIDFormat, this.DIDPrefix, this.DIDMethod)
-          return { certificate: cid, data: data }
+          return { certificate: Utils.formatHexString(cid, this.CIDFormat, this.CIDPrefix, this.CIDMethod), data: data }
         }
         return null
       })
@@ -534,7 +559,7 @@ module.exports = class DIDs {
    * @returns {string} network name
    */
   async getNetworkName (exec) {
-    const network = JSON.parse(await exec.api.query.idSpace.caelumNetworkId())
+    const network = await exec.api.query.idSpace.caelumNetworkId()
     return network
   }
 
@@ -592,6 +617,11 @@ module.exports = class DIDs {
     // Check if DID is wellformed
     did = Utils.verifyDIDString(did, this.DIDFormat)
     if (did === false) {
+      return false
+    }
+    // Check if token id is wellformed
+    tokenId = Utils.verifyTokenFormat(tokenId, this.DIDFormat)
+    if (tokenId === false) {
       return false
     }
     const { internalDid } = Utils.structDid(did)

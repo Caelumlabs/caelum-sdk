@@ -21,6 +21,8 @@
   },
     "Certificate": {
     "release": "IdSpaceReleases",
+    "did_version": "u8",
+    "network_id": "Vec<u8>",
     "owner": "AccountId",
     "did_owner": "Vec<u8>",
     "title": "Vec<u8>",

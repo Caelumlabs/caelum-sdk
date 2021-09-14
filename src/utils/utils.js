@@ -74,7 +74,37 @@ class Utils {
    * @returns {boolean} True if string is correct
    */
   static verifyTokenFormat (str, format) {
-    return this.verifyHexString('0x' + str)
+    if (!format) {
+      format = Formats.DEFAULT
+    }
+    let s = str
+    if (str.includes(':')) {
+      const s1 = str.split(':')
+      if (s1.length === 4) {
+        s = s1[3]
+      } else {
+        if (s1.length === 3) {
+          s = s1[2]
+        }
+      }
+    }
+    switch (s.slice(0, 1)) {
+      case 'T':
+        if (s.slice(1).startsWith('0x')) {
+          str = str.slice(1)
+        } else {
+          if (s.slice(1).includes('-')) {
+            str = this.fromBase58ToHex(str)
+          } else {
+            str = this.fromTokenStandardToHex(str)
+          }
+        }
+        break
+      default:
+        str = str.slice(0)
+        break
+    }
+    return parseInt(this.verifyHexString('0x' + str), 16)
   }
 
   /**
@@ -112,7 +142,15 @@ class Utils {
         }
         break
       case 'C':
-        str = '0x' + str.slice(1)
+        if (s.slice(1).startsWith('0x')) {
+          str = str.slice(1)
+        } else {
+          if (s.slice(1).includes('-')) {
+            str = this.fromBase58ToHex(str)
+          } else {
+            str = this.fromStandardToHex(str)
+          }
+        }
         break
       case 'T':
         str = '0x' + str.slice(1)
@@ -170,6 +208,33 @@ class Utils {
                   Utils.decimalToHex(s[2].length) +
                   this.stringToU8aHex(s[2]) +
                   s[3].slice(1)
+  }
+
+  /**
+   * Convert any Token Standard to Hexadecimal
+   *
+   * @param {object} str DID in decimal format
+   * @param {string} sep separator for type
+   * @returns {bool} True if string is correct
+   */
+  static fromTokenStandardToHex (str, sep) {
+    const s1 = str.split(':')
+    let s = ''
+    let found = false
+    for (let i = 1; i <= s1[3].slice(1).length; i++) {
+      if (s1[3][i] !== '0') {
+        found = true
+        s = s + s1[3][i]
+      } else {
+        if (found) {
+          s = s1[3][i]
+        }
+      }
+    }
+    if (s.length % 2 !== 0) {
+      s = '0' + s
+    }
+    return s
   }
 
   /**
@@ -242,6 +307,17 @@ class Utils {
    * @returns {bool} True if string is correct
    */
   static fromBase58ToHex (str) {
+    const s = str.split(':')
+    return u8aToHex(this.fromBase58(s[2].slice(1)))
+  }
+  
+  /**
+   * Convert any Token from Base58 to Hexadecimal
+   *
+   * @param {object} str DID in base58 format
+   * @returns {bool} True if string is correct
+   */
+  static fromTokenBase58ToHex (str) {
     const s = str.split(':')
     return u8aToHex(this.fromBase58(s[2].slice(1)))
   }
@@ -351,7 +427,7 @@ class Utils {
     }
     return s
   }
-
+  
   /**
    * Destructure DID into its components as version.
    *
