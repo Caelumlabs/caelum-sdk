@@ -351,7 +351,7 @@ class Utils {
     }
     return s
   }
-  
+
   /**
    * Destructure DID into its components as version.
    *

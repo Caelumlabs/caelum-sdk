@@ -3,8 +3,7 @@ const axios = require('axios');
 const { hexToString, stringToHex, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
 const SDK = require('./sdk');
-
-const TOKENID = 1;
+TOKENID = 1
 
 /**
  * Schema.org: Organization.
@@ -16,6 +15,8 @@ module.exports = class Organization {
    */
   constructor(blockchain, did = false) {
     this.did = did;
+    this.tokenId = TOKENID;
+
     this.seed = '';
     this.keypair = {};
     this.info = {};
@@ -30,14 +31,18 @@ module.exports = class Organization {
     if (this.did) await this.getData();
   }
 
-  async registerToken(tokenId, tokenName, tokenSymbol, amount) {
+  async registerToken(tokenName, tokenSymbol, amount) {
     // Create a new token.
-    await this.blockchain.createToken(tokenId, this.keypair.address, 0);
-    await this.blockchain.setTokenMetadata(tokenId, tokenName, tokenSymbol, 0);
-    await this.blockchain.transferTokenOwnership(tokenId, this.keypair.address);
+    await this.blockchain.createToken(this.keypair.address);
+    const createdEvent = await this.blockchain.wait4Event('Created')
+    this.tokenId = createdEvent[0]
+
+    await this.blockchain.setTokenMetadata(this.tokenId, tokenName, tokenSymbol, 0);
+    await this.blockchain.transferTokenOwnership(this.tokenId, this.keypair.address);
 
     // Mint tokens.
-    await this.blockchain.mintToken(tokenId, this.keypair.address, amount);
+    await this.blockchain.mintToken(this.tokenId, this.keypair.address, amount);
+    return this.tokenId;
   }
 
   async registerOrganization(legalName, taxId, level, keys, tokenId, amount) {
@@ -75,7 +80,7 @@ module.exports = class Organization {
   async getData() {
     const data = await this.blockchain.getDidData(this.did);
     this.owner = data.owner;
-    const tokendata = await this.blockchain.getAccountTokenData(TOKENID, data.owner);
+    const tokendata = await this.blockchain.getAccountTokenData(this.tokenId, data.owner);
     this.info.balance = tokendata.balance;
     const signer = await this.blockchain.getKey(this.did);
     this.signer = { publicKey: u8aToString(signer).toString() };
@@ -102,7 +107,7 @@ module.exports = class Organization {
 
     // Transfer Ownership.
     await this.blockchain.transferDidOwnershipGasAndTokens(
-      this.did, newKeys.address, TOKENID, 'all', 'all',
+      this.did, newKeys.address, this.tokenId, 'all', 'all',
     );
 
     // Update keyring.

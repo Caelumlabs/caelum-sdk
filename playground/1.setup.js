@@ -7,37 +7,36 @@ const init = async () => {
   await caelum.connect();
   // Connect ROOT Organization.
   const root = await caelum.getOrganizationFromSeed(process.env.ROOT_SEED);
-  await root.registerToken(
-    process.env.TOKEN_ID,
+  const tokenId = await root.registerToken(
     process.env.TOKEN_NAME,
     process.env.TOKEN_SYMBOL,
     1000000000,
   );
 
   // Register Basic Token.
-  const token = await caelum.getTokenDetails(process.env.TOKEN_ID);
+  const token = await caelum.getTokenDetails(tokenId);
   console.log('Token Details', token);
 
-  const balance = await caelum.getTokenBalance(process.env.TOKEN_ID, root.keypair.address);
+  const balance = await caelum.getTokenBalance(tokenId, root.keypair.address);
   console.log(`Balance ${balance} ${process.env.TOKEN_SYMBOL}`);
 
   // Set costs in Tokens for actions.
   await caelum.setEcosystemCosts(process.env.ROOT_SEED, {
-    registerDid: [process.env.TOKEN_ID, 50],
-    setKey: [process.env.TOKEN_ID, 5],
-    putHash: [process.env.TOKEN_ID, 1],
-    changeLegalNameOrTaxId: [process.env.TOKEN_ID, 5],
-    updateInfo: [process.env.TOKEN_ID, 5],
-    changeDidOwner: [process.env.TOKEN_ID, 5],
-    revokeHash: [process.env.TOKEN_ID, 5],
-    removeDid: [process.env.TOKEN_ID, 50],
-    addCertificate: [process.env.TOKEN_ID, 10],
-    revokeCertificate: [process.env.TOKEN_ID, 10],
-    addDocument: [process.env.TOKEN_ID, 1],
-    addAttachment: [process.env.TOKEN_ID, 1],
-    startProcess: [process.env.TOKEN_ID, 0],
-    startSubprocess: [process.env.TOKEN_ID, 0],
-    startStep: [process.env.TOKEN_ID, 0],
+    registerDid: [tokenId, 50],
+    setKey: [tokenId, 5],
+    putHash: [tokenId, 1],
+    changeLegalNameOrTaxId: [tokenId, 5],
+    updateInfo: [tokenId, 5],
+    changeDidOwner: [tokenId, 5],
+    revokeHash: [tokenId, 5],
+    removeDid: [tokenId, 50],
+    addCertificate: [tokenId, 10],
+    revokeCertificate: [tokenId, 10],
+    addDocument: [tokenId, 1],
+    addAttachment: [tokenId, 1],
+    startProcess: [tokenId, 0],
+    startSubprocess: [tokenId, 0],
+    startStep: [tokenId, 0],
   });
   // Disconnect.
   await caelum.disconnect();
