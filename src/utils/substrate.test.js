@@ -26,7 +26,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   let aliceAddr, tempWallet, tempWallet2, tempWallet3, tempWallet4
   let cid1, cid2, cid3
   let tokenid
-  const format = Formats.BASE58
+  const format = Formats.STANDARD
   const prefix = 'A'
   const sep = ':'
   const diddocHash = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
@@ -159,38 +159,37 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
   it('Should Save a DID to Blockchain', async () => {
     // Result should equal to true => No errors
-    const result = await blockchain.registerDid(tempWallet.address, 2000, 2, 'Legal Name', 'Tax Id')
+    const result = await blockchain.registerDid(tempWallet.address, 2000, 'Legal Name', 'Tax Id')
     expect(result).equal(true)
 
     // Promoter Account from even data should be address Alice
     const registeredDidEvent = await blockchain.wait4Event('DidRegistered')
     expect(registeredDidEvent[1]).equal(aliceAddr)
-
     // DID Owner should be the address of tempWallet
     const didDataJson = await blockchain.getDidData(registeredDidEvent[0])
     console.log('DID =', registeredDidEvent[0])
-    const didConverted = Utils.formatHexString(registeredDidEvent[0], blockchain.getDIDFormat().Format, prefix, sep)
+    const didConverted = Utils.formatHexString(registeredDidEvent[0], blockchain.getDIDFormat().Format, prefix, 'caelum')
     console.log('DID converted =', didConverted)
     let didAgain 
     console.log('blockchain.getDIDFormat().Format', blockchain.getDIDFormat())
     switch (blockchain.getDIDFormat().Format) {
       case Formats.STANDARD:
-        didAgain = Utils.FromStandardToHex(didConverted)
+        didAgain = Utils.fromStandardToHex(didConverted)
         break
       case Formats.HEXADECIMAL:
         didAgain = didConverted.slice(2)
         break
       case Formats.BASE58:
-        didAgain = Utils.FromBase58ToHex(didConverted)
+        didAgain = Utils.fromBase58ToHex(didConverted)
         break
       case Formats.DECIMAL:
-        didAgain = Utils.FromStandardToHex(didConverted)
+        didAgain = Utils.fromStandardToHex(didConverted)
         break
       case Formats.DEFAULT:
-        didAgain = Utils.FromStandardToHex(didConverted)
+        didAgain = Utils.fromStandardToHex(didConverted)
         break
       default:
-        didAgain = Utils.FromStandardToHex(didConverted)
+        didAgain = Utils.fromStandardToHex(didConverted)
         break
     }
     console.log('DID Again =', didAgain)
@@ -202,13 +201,13 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   })
 
   it('Should try again to register the same DID and fail', async () => {
-    const result = await blockchain.registerDid(tempWallet.address, 2000, 2, 'Legal Name', 'Tax Id')
+    const result = await blockchain.registerDid(tempWallet.address, 2000, 'Legal Name', 'Tax Id')
     expect(result).equal(false)
   })
 
   it('Should Save a DID to Blockchain with level 11 (1-1999) Organization account', async () => {
     // Result should equal to true => No errors
-    const result = await blockchain.registerDid(tempWallet2.address, 11, 1, 'Legal name 2', 'Tax Id 2')
+    const result = await blockchain.registerDid(tempWallet2.address, 11, 'Legal name 2', 'Tax Id 2')
     expect(result).equal(true)
 
     // Promoter Account from even data should be address Alice
@@ -227,7 +226,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   it('Should save a DID to the Blockchain with level 5000 (2000 ->) using Organization account', async () => {
     blockchain.setKeyring(tempWallet2.mnemonic)
     // Result should equal to true => No errors
-    const result = await blockchain.registerDid(tempWallet3.address, 5000, 3, 'Legal name 3', 'Tax id 3')
+    const result = await blockchain.registerDid(tempWallet3.address, 5000, 'Legal name 3', 'Tax id 3')
     expect(result).equal(true)
 
     // Promoter Account from even data should be address tempWallet2
@@ -341,6 +340,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   })
 
   it('Should add a Certificate to Blockchain', async () => {
+    console.log('Network name - %O', await blockchain.getNetworkName())
     blockchain.setKeyring(tempWallet.mnemonic)
     // Vec<u8> parameters must be entered as hex strings (e.g.: format 0xab67c8ff...)
     const result = await blockchain.addCertificate()
@@ -353,7 +353,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
     // DID must be DID of the Owner because has not been provided
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
-    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, sep)).equal(didPromoter)
+    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, 'caelum')).equal(didPromoter)
   })
 
   it('Should add three new Certificates to Blockchain', async () => {
@@ -391,7 +391,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
     // DID must be DID of the Owner
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
-    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, sep)).equal(didPromoter)
+    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, 'caelum')).equal(didPromoter)
     // See result
     const res = await blockchain.getCertificatesByDID(didPromoter)
     if (res.length > 0) {
@@ -469,7 +469,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     const tempWalletDid = await blockchain.getDidFromOwner(tempWallet.address)
     await blockchain.removeDid(tempWalletDid)
     const subs = await blockchain.wait4Event('DidRemoved')
-    expect(Utils.formatHexString(subs[1], blockchain.getDIDFormat().Format, prefix, sep).eql(tempWalletDid))
+    expect(Utils.formatHexString(subs[1], blockchain.getDIDFormat().Format, prefix, 'caelum').eql(tempWalletDid))
   })
 
   it.skip('Should sweep Gas from Zelda to Alice', async () => {

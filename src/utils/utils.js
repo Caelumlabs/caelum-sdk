@@ -67,37 +67,71 @@ class Utils {
   }
 
   /**
+   * Verify correct token hex string
+   *
+   * @param {string} str source
+   * @param {string} format source string format
+   * @returns {boolean} True if string is correct
+   */
+  static verifyTokenFormat (str, format) {
+    return this.verifyHexString('0x' + str)
+  }
+
+  /**
    * Verify correct hex string
    *
    * @param {string} str source
    * @param {string} format source string format
    * @returns {boolean} True if string is correct
    */
-  static verifyHexString (str, format) {
+  static verifyDIDString (str, format) {
     if (!format) {
       format = Formats.DEFAULT
     }
-    let pattern = null
-    if (str.slice(0, 2) === 'B:' || str.slice(0, 2) === 'C:') {
-      str = str.slice(2)
-    } else {
-      if (str.slice(0, 2) === 'A:') {
-        if (str.slice(2).startsWith('0x')) {
-          str = str.slice(2)
-        } else {
-          if (str.slice(2).includes(':')) {
-            str = this.FromStandardToHex(str)
-          } else {
-            if (str.slice(2).includes('-')) {
-              str = this.FromBase58ToHex(str)
-            } else {
-              str = this.FromStandardToHex(str)
-            }
-          }
+    let s = str
+    if (str.includes(':')) {
+      const s1 = str.split(':')
+      if (s1.length === 4) {
+        s = s1[3]
+      } else {
+        if (s1.length === 3) {
+          s = s1[2]
         }
       }
     }
+    switch (s.slice(0, 1)) {
+      case 'A':
+        if (s.slice(1).startsWith('0x')) {
+          str = str.slice(1)
+        } else {
+          if (s.slice(1).includes('-')) {
+            str = this.fromBase58ToHex(str)
+          } else {
+            str = this.fromStandardToHex(str)
+          }
+        }
+        break
+      case 'C':
+        str = '0x' + str.slice(1)
+        break
+      case 'T':
+        str = '0x' + str.slice(1)
+        break
+      default:
+        str = str.slice(0)
+        break
+    }
+    return this.verifyHexString(str)
+  }
 
+  /**
+   * Verify correct hex string
+   *
+   * @param {string} str source
+   * @returns {boolean} True if string is correct
+   */
+  static verifyHexString (str) {
+    let pattern = null
     if (str.slice(0, 2) === '0X') {
       pattern = /[A-F0-9]/gi
     } else {
@@ -130,13 +164,12 @@ class Utils {
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static FromStandardToHex (str, sep) {
+  static fromStandardToHex (str, sep) {
     const s = str.split(':')
-    return '0x' + Utils.decimalToHex(s[1], 2) +
+    return '0x' + Utils.decimalToHex(1) +
                   Utils.decimalToHex(s[2].length) +
                   this.stringToU8aHex(s[2]) +
-                  Utils.decimalToHex(s[3], 2) +
-                  s[4]
+                  s[3].slice(1)
   }
 
   /**
@@ -145,28 +178,29 @@ class Utils {
    * @param {object} str type in hex format
    * @param {object} format type format
    * @param {string} prefix prefix for type
+   * @param {string} method DID method
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static formatHexString (str, format, prefix, sep) {
+  static formatHexString (str, format, prefix, method, sep = ':') {
     switch (format) {
       case Formats.STANDARD:
-        str = this.DIDFromHexToStandard(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, method, sep)
         break
       case Formats.HEXADECIMAL:
         str = '' + prefix + sep + str
         break
       case Formats.BASE58:
-        str = this.DIDFromHexToBase58(str, prefix, sep)
+        str = this.DIDFromHexToBase58(str, prefix, method, sep)
         break
       case Formats.DECIMAL:
-        str = this.DIDFromHexToStandard(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, method, sep)
         break
       case Formats.DEFAULT:
-        str = this.DIDFromHexToStandard(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, method, sep)
         break
       default:
-        str = this.DIDFromHexToStandard(str, prefix, sep)
+        str = this.DIDFromHexToStandard(str, prefix, method, sep)
         break
     }
     return str
@@ -177,13 +211,13 @@ class Utils {
    *
    * @param {object} str DID in hex format
    * @param {string} prefix prefix for type
+   * @param {string} method DID method
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static DIDFromHexToBase58 (str, prefix, sep) {
-    const s = '' + prefix + sep
-    const s1 = this.toBase58(hexToU8a(str))
-    return s + this.insertSeparator(this.toBase58(hexToU8a(str)))
+  static DIDFromHexToBase58 (str, prefix, method, sep) {
+    const s = 'did' + sep + method + sep + prefix + this.insertSeparator(this.toBase58(hexToU8a(str)))
+    return s
   }
 
   /**
@@ -191,13 +225,14 @@ class Utils {
    *
    * @param {object} str DID in hex format
    * @param {string} prefix prefix for type
+   * @param {string} method DID method
    * @param {string} sep separator for type
    * @returns {bool} True if string is correct
    */
-  static DIDFromHexToStandard (str, prefix, sep) {
-    const s = '' + prefix + sep
-    const { version, networkLength, network, didType, internalDid } = this.structDid(str)
-    return s + parseInt(version, 16) + sep + network + sep + parseInt(didType, 16) + sep + internalDid.slice(2)
+  static DIDFromHexToStandard (str, prefix, method, sep) {
+    const { version, networkLength, network, internalDid } = this.structDid(str)
+    const s = 'did' + sep + method + sep + network + sep + prefix + internalDid.slice(2)
+    return s
   }
 
   /**
@@ -206,8 +241,9 @@ class Utils {
    * @param {object} str DID in base58 format
    * @returns {bool} True if string is correct
    */
-  static FromBase58ToHex (str) {
-    return u8aToHex(this.fromBase58(str.slice(2)))
+  static fromBase58ToHex (str) {
+    const s = str.split(':')
+    return u8aToHex(this.fromBase58(s[2].slice(1)))
   }
 
   /**
@@ -328,8 +364,7 @@ class Utils {
       version: did.slice(2, 4),
       networkLength: networkLength,
       network: this.stringU8aToString(did.slice(6, 6 + networkLength * 2)),
-      didType: did.slice(6 + networkLength * 2, 8 + networkLength * 2),
-      internalDid: did.slice(0, 2).concat(did.slice(8 + networkLength * 2))
+      internalDid: did.slice(0, 2).concat(did.slice(6 + networkLength * 2))
     }
   }
 }

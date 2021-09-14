@@ -28,7 +28,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
     this.dids = new DID(Formats.STANDARD)
     this.gas = new Gas()
     this.process = new Process(Formats.STANDARD)
-    this.tokens = new Tokens()
+    this.tokens = new Tokens(Formats.STANDARD)
     this.classNFTs = new ClassNFTs()
     this.keypair = {}
   }
@@ -182,20 +182,18 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    *
    * @param {string} accountTo Account to assign DID
    * @param {number} level Level to assign
-   * @param {number} didType DID type
    * @param {string} legalName Organization Legal Name
    * @param {string} taxId Organization tax id
    * @returns {Promise} of transaction
    */
-  async registerDid(accountTo, level, didType, legalName, taxId) {
+  async registerDid(accountTo, level, legalName, taxId) {
     return this.dids.registerDid(
       this.exec,
       this.keypair,
       accountTo,
       level,
-      didType,
       legalName,
-      taxId,
+      taxId
     );
   }
 
@@ -1803,6 +1801,15 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
+   * Get tha network name.
+   *
+   * @returns {string} network name
+   */
+  async getNetworkName () {
+    return this.dids.getNetworkName(this.exec)
+  }
+
+  /**
    * Subscribe to register events
    *
    * @param {string} eventMethod Event to listen to
@@ -1818,7 +1825,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} format Format to set
    */
   setFormat (format) {
-    this.dids.setFormat(format)
+    this.dids.setDIDFormat(format)
     this.process.setFormat(format)
     this.tokens.setFormat(format)
   }
@@ -1829,7 +1836,16 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} format Format to set
    */
   setDIDFormat (format) {
-    this.dids.setFormat(format)
+    this.dids.setDIDFormat(format)
+  }
+
+  /**
+   * Sets a format for CIDs
+   *
+   * @param {string} format Format to set
+   */
+  setCIDFormat (format) {
+    this.dids.setCIDFormat(format)
   }
 
   /**

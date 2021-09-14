@@ -14,23 +14,34 @@ module.exports = class Process {
    *
    * @param {string} format Format presentation for DIDs
    */
-  constructor (format) {
-    this.format = format
-    this.DIDPrefix = 'A'
-    this.DIDSep = ':'
-    this.CIDPrefix = 'B'
-    this.CIDSep = ':'
+  constructor (format, method = 'caelum') {
+    this.Format = format
+    this.Prefix = 'A'
+    this.Method = method
   }
 
   /**
    * Sets a format 
    *
    * @param {string} format Format to set
-   * @returns {Promise} Result of the transaction
    */
-  async setFormat (format) {
-    this.format = format
+  setFormat (format) {
+    this.Format = format
   }
+
+  /**
+   * Get the format 
+   *
+   * @returns {object} Result of the transaction
+   */
+  getFormat () {
+    return {
+      Format: this.Format,
+      Prefix: this.Prefix,
+      Method: this.Method
+    }
+  }
+
 
   /**
    * Starts a Process.
@@ -47,7 +58,7 @@ module.exports = class Process {
    */
   async startProcess (exec, keypair, did, hash) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.format)
     if (did === false) {
       return false
     }
@@ -74,7 +85,7 @@ module.exports = class Process {
    */
   async startSubprocess (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.format)
     if (did === false) {
       return false
     }
@@ -102,7 +113,7 @@ module.exports = class Process {
    */
   async startStep (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.format)
     if (did === false) {
       return false
     }
@@ -130,7 +141,7 @@ module.exports = class Process {
    */
   async addDocument (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.format)
     if (did === false) {
       return false
     }
@@ -158,7 +169,7 @@ module.exports = class Process {
    */
   async addAttachment (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyHexString(did, this.format)
+    did = Utils.verifyDIDString(did, this.format)
     if (did === false) {
       return false
     }
@@ -254,7 +265,7 @@ module.exports = class Process {
     const hexHash = Utils.base64ToHex(hash)
     let nodeData = await exec.api.query.idSpace.processTree(hexHash)
     nodeData = JSON.parse(nodeData) 
-    nodeData.did = Utils.formatHexString(nodeData.did, this.format, this.DIDPrefix, this.DIDSep)
+    nodeData.did = Utils.formatHexString(nodeData.did, this.Format, this.Prefix, this.Method)
     return nodeData
   }
 
@@ -271,7 +282,7 @@ module.exports = class Process {
       }
     }
     if (tree.DID !== undefined) {
-      tree.DID = Utils.formatHexString(tree.DID, this.format, this.DIDPrefix, this.DIDSep)
+      tree.DID = Utils.formatHexString(tree.DID, this.Format, this.Prefix, this.Method)
     }
     if (tree.Process !== undefined) {
       tree.Process = this.formatProcessTree(tree.Process)
