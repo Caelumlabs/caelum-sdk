@@ -132,13 +132,8 @@ module.exports = class Organization {
   }
 
   async registerCertificate(title, type, url = '', image = '') {
-    if (await this.blockchain.addCertificate(title, url, image, type)) {
-      const certificateDid = await this.blockchain.wait4Event('CIDCreated');
-      // const fmt = this.blockchain.getCIDFormat();
-      // const certificateDid = Utils.formatHexString(ev[0], fmt.Format, fmt.Prefix, fmt.Method);
-      return certificateDid;
-    }
-    return false;
+    const certificateDid = await this.blockchain.addCertificate(title, url, image, type);
+    return certificateDid;
   }
 
   async getCertificates() {
