@@ -1,6 +1,4 @@
 const axios = require('axios');
-const Blockchain = require('../utils/substrate');
-const Crypto = require('../utils/crypto');
 const SDK = require('./sdk');
 const W3C = require('../utils/zenroom');
 
@@ -36,17 +34,21 @@ module.exports = class User {
    * @param {string} peerDid Peer DID.
    * @return {object} Signed VC for the session.
    */
-  async signSession(sessionIdString, did, keys) {
-    const credential = {
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      type: ['VerifiableCredential', 'Session'],
-      issuer: `did:peerdid:${keys.Organization.keypair.public_key}`,
-      credentialSubject: { did: `did:caelum:${did}`, sessionIdString },
-      issuanceDate: new Date().toISOString(),
-    };
-    const issuer = { Issuer: { keypair: keys.Organization.keypair , PublicKeyUrl: 'did:caelum' }};
-    const signedCredential = await W3C.signCredential(credential, issuer);
-    return signedCredential;
+  static signSession(sessionIdString, did, keys) {
+    return new Promise((resolve) => {
+      const credential = {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        type: ['VerifiableCredential', 'Session'],
+        issuer: `did:peerdid:${keys.peerDid}`,
+        credentialSubject: { did: `did:caelum:${did}`, sessionIdString },
+        issuanceDate: new Date().toISOString(),
+      };
+      const keypair = { public_key: keys.peerDid, private_key: keys.secret };
+      const issuer = { Issuer: { keypair, PublicKeyUrl: `did:peerDid:${keys.peerDid}` } };
+      W3C.signCredential(credential, issuer)
+        .then((signedCredential) => resolve(signedCredential))
+        .catch(() => resolve(false));
+    });
   }
 
   /**
@@ -62,19 +64,28 @@ module.exports = class User {
       if (this.connections[org.did]) reject(new Error('organization already exists'));
       else {
         this.orgs[org.did] = org;
+        this.orgs[org.did] = {
+          did: org.did,
+          tokenId: org.tokenId,
+          info: org.info,
+          signer: org.signer,
+          certificates: org.certificates,
+        };
         this.connections[org.did] = {};
         this.caelum.newCertificateKeys()
           .then((keys) => {
             this.connections[org.did] = keys;
+            this.connections[org.did] = {
+              peerDid: keys.Organization.keypair.public_key,
+              secret: keys.Organization.keypair.private_key,
+            };
             return this.signSession(sessionIdString, org.did, keys);
           })
-          .then((signature) => {
-            return axios.put(`${org.info.endpoint}auth/session`, {
-              action: 'register',
-              secret: secretCode,
-              signature,
-            });
-          })
+          .then((signature) => axios.put(`${org.info.endpoint}auth/session`, {
+            action: 'register',
+            secret: secretCode,
+            signature,
+          }))
           .then((result) => {
             // Save to list of connections
             this.credentials[result.data.hashId] = {
@@ -138,7 +149,7 @@ module.exports = class User {
    * @param {string} sessionId Session ID
    */
   async login(org, capability, _sessionIdString = '') {
-    const did = org.info.did.split(':').pop();
+    const { did } = org;
     const sessionIdString = (_sessionIdString === '')
       ? (await this.orgs[did].getSession(capability)).sessionIdString
       : _sessionIdString;
