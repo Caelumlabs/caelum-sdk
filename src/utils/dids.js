@@ -664,12 +664,14 @@ module.exports = class DIDs {
     if (gasQty > existentialDeposit) {
       gasQty = gasQty.sub(existentialDeposit)
     } else {
+      console.log('Gas QTY is greater than existentialDeposit')
       console.log('Can not transfer any gas to destination')
       return false
     }
     if (gasQty > info.partialFee) {
       gasQty = gasQty.sub(info.partialFee)
     } else {
+      console.log('Gas QTY is greater than partialFee')
       console.log('Can not transfer any gas to destination')
       return false
     }
@@ -677,6 +679,7 @@ module.exports = class DIDs {
       if (gasAmount <= gasQty) {
         gasQty = gasAmount
       } else {
+        console.log('Gas amount is greater than gas QTY')
         console.log('Can not transfer any gas to destination')
         return false
       }
