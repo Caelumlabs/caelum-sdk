@@ -1,6 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 const debug = require('debug')('did:debug:sub');
 const { Keyring } = require('@polkadot/api');
+const { stringToHex } = require('@polkadot/util');
 const { mnemonicGenerate, mnemonicValidate } = require('@polkadot/util-crypto');
 const { cryptoWaitReady } = require('@polkadot/util-crypto');
 const BlockchainInterface = require('./blockchain');
@@ -495,7 +496,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @returns {object} Credential/Hash
    */
   async getHash(hash) {
-    return this.dids.getHash(this.exec, hash);
+    return this.dids.getHash(this.exec, stringToHex(hash));
   }
 
   /**

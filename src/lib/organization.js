@@ -3,7 +3,6 @@ const axios = require('axios');
 const { hexToString, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
 const SDK = require('./sdk');
-const Utils = require('../utils/utils');
 
 const TOKENID = 'did:caelum:rigel:T001';
 
@@ -201,7 +200,7 @@ module.exports = class Organization {
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-    console.log(`Hash ${hash}`);
+    console.log(hash);
     // const hashes = await this.blockchain.getAllHashesForDid(this.did);
     return valid;
   }
