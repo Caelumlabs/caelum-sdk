@@ -682,6 +682,11 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async setTokensAndCosts (exec, keypair, tokenAndCost) {
+    Object.entries(tokenAndCost).forEach(item => {
+      if (item[1][0] !== 0) {
+        item[1][0] = Utils.verifyTokenFormat(item[1][0], this.format)
+      }
+    })
     const transaction = await exec.api.tx.idSpace.setTokenAndCost(tokenAndCost)
     return await exec.execTransaction(keypair, transaction)
   } 
