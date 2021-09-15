@@ -1,6 +1,6 @@
 {
   "name": "caelum-sdk",
-  "version": "2.0.22",
+  "version": "2.0.23",
   "description": "Caelum libraries",
   "main": "src/index.js",
   "repository": "https://github.com/Caelumlabs/caelum.git",
