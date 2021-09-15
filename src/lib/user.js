@@ -79,7 +79,7 @@ module.exports = class User {
               peerDid: keys.Organization.keypair.public_key,
               secret: keys.Organization.keypair.private_key,
             };
-            return this.signSession(sessionIdString, org.did, keys);
+            return User.signSession(sessionIdString, org.did, keys);
           })
           .then((signature) => axios.put(`${org.info.endpoint}auth/session`, {
             action: 'register',
@@ -153,7 +153,7 @@ module.exports = class User {
     const sessionIdString = (_sessionIdString === '')
       ? (await this.orgs[did].getSession(capability)).sessionIdString
       : _sessionIdString;
-    const signature = await this.signSession(sessionIdString, did, this.connections[did]);
+    const signature = await User.signSession(sessionIdString, did, this.connections[did]);
     const postData = {
       action: 'login',
       signature,
