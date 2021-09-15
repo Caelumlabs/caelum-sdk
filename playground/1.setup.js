@@ -7,13 +7,13 @@ const init = async () => {
   await caelum.connect();
   // Connect ROOT Organization.
   const root = await caelum.getOrganizationFromSeed(process.env.ROOT_SEED);
+  console.log('Register Tokens');
   const tokenId = await root.registerToken(
     process.env.TOKEN_NAME,
     process.env.TOKEN_SYMBOL,
     1000000000,
   );
-
-  // Register Basic Token.
+  console.log('get Detail');
   const token = await caelum.getTokenDetails(tokenId);
   console.log('Token Details', token);
 

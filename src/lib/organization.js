@@ -1,9 +1,11 @@
 const debug = require('debug')('did:debug:org');
 const axios = require('axios');
-const { hexToString, stringToHex, u8aToString } = require('@polkadot/util');
+const { hexToString, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
 const SDK = require('./sdk');
-TOKENID = 1
+const Utils = require('../utils/utils');
+
+const TOKENID = 'did:caelum:rigel:T001';
 
 /**
  * Schema.org: Organization.
@@ -16,7 +18,6 @@ module.exports = class Organization {
   constructor(blockchain, did = false) {
     this.did = did;
     this.tokenId = TOKENID;
-
     this.seed = '';
     this.keypair = {};
     this.info = {};
@@ -33,9 +34,7 @@ module.exports = class Organization {
 
   async registerToken(tokenName, tokenSymbol, amount) {
     // Create a new token.
-    await this.blockchain.createToken(this.keypair.address);
-    const createdEvent = await this.blockchain.wait4Event('Created')
-    this.tokenId = createdEvent[0]
+    this.tokenId = await this.blockchain.createToken(this.keypair.address);
 
     await this.blockchain.setTokenMetadata(this.tokenId, tokenName, tokenSymbol, 0);
     await this.blockchain.transferTokenOwnership(this.tokenId, this.keypair.address);
@@ -45,15 +44,15 @@ module.exports = class Organization {
     return this.tokenId;
   }
 
-  async registerOrganization(legalName, taxId, level, keys, tokenId, amount) {
+  async registerOrganization(legalName, taxId, level, keys, amount) {
     debug(`registerOrg - ${legalName}`);
     await this.blockchain.registerDid(keys.address, level, legalName, taxId);
     await this.blockchain.wait4Event('DidRegistered');
     const did = await this.blockchain.getDidFromOwner(keys.address);
     debug(`DID = ${did}`);
     debug(`Mnemonic = ${keys.mnemonic}`);
-    await this.blockchain.transferGas(keys.address, 100000);
-    await this.blockchain.transferToken(tokenId, keys.address, amount);
+    await this.blockchain.transferGas(keys.address, 1000000000000);
+    await this.blockchain.transferToken(this.tokenId, keys.address, amount);
     const newOrg = new Organization(this.blockchain, did);
     newOrg.keys = keys;
     return newOrg;
@@ -80,13 +79,14 @@ module.exports = class Organization {
   async getData() {
     const data = await this.blockchain.getDidData(this.did);
     this.owner = data.owner;
-    const tokendata = await this.blockchain.getAccountTokenData(this.tokenId, data.owner);
-    this.info.balance = tokendata.balance;
+	if (this.tokenId) {
+      const tokendata = await this.blockchain.getAccountTokenData(this.tokenId, data.owner);
+      this.info.balance = tokendata.balance;
+	}
     const signer = await this.blockchain.getKey(this.did);
     this.signer = { publicKey: u8aToString(signer).toString() };
     const gasdata = await this.blockchain.addrState(this.owner);
     this.info.gas = gasdata.balance.free.toHuman();
-    this.info.did = `did:caelum:${this.did}`;
     this.info.legalName = hexToString(data.legal_name);
     this.info.taxId = hexToString(data.tax_id);
     this.info.name = (data.info.name) ? hexToString(data.info.name) : '';
@@ -133,9 +133,13 @@ module.exports = class Organization {
   }
 
   async registerCertificate(title, type, url = '', image = '') {
-    await this.blockchain.addCertificate(title, url, image, type);
-    const event = await this.blockchain.wait4Event('CIDCreated');
-    return `did:caelum:${event[0]}`;
+    if (await this.blockchain.addCertificate(title, url, image, type)) {
+      const certificateDid = await this.blockchain.wait4Event('CIDCreated');
+      // const fmt = this.blockchain.getCIDFormat();
+      // const certificateDid = Utils.formatHexString(ev[0], fmt.Format, fmt.Prefix, fmt.Method);
+      return certificateDid;
+    }
+    return false;
   }
 
   async getCertificates() {
@@ -156,7 +160,7 @@ module.exports = class Organization {
         'https://caelumapp.com/context/v1',
       ],
       type: ['VerifiableCredential', type],
-      issuer: this.info.did,
+      issuer: this.did,
       credentialSubject: {
         id: certificateDid,
         ...certificate.subject,
@@ -174,12 +178,17 @@ module.exports = class Organization {
           public_key: this.signer.publicKey,
           private_key: this.signer.privateKey,
         },
-        PublicKeyUrl: this.info.did,
+        PublicKeyUrl: this.did,
       },
     };
-    const certificateDid_items = certificateDid.split(':');
     const signedCredential = await W3C.signCredential(credential, issuer);
-    await this.blockchain.putHash(this.did, signedCredential.proof.jws, certificateDid_items[2], type);
+	  console.log(this.did, signedCredential.proof.jws, certificateDid, type);
+    await this.blockchain.putHash(
+      this.did,
+      signedCredential.proof.jws,
+      certificateDid,
+	  type,
+    );
     await this.blockchain.wait4Event('CredentialAssigned');
     return signedCredential;
   }
@@ -192,7 +201,7 @@ module.exports = class Organization {
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-	  console.log('Hash', hash);
+    console.log(`Hash ${hash}`);
     // const hashes = await this.blockchain.getAllHashesForDid(this.did);
     return valid;
   }
@@ -220,14 +229,14 @@ module.exports = class Organization {
   }
 
   async startSdk() {
-    this.sdk = new SDK(this.caelum, this.info.did, '', this.info.endpoint, 'peerdid');
+    this.sdk = new SDK(this.caelum, this.did, '', this.info.endpoint, 'peerdid');
   }
 
   waitSession(sessionIdString) {
     return new Promise((resolve) => {
       axios.get(`${this.info.endpoint}auth/session/wait/${sessionIdString}`)
         .then(async (result) => {
-          this.sdk = new SDK(this.caelum, this.info.did, result.data.tokenApi, this.info.endpoint);
+          this.sdk = new SDK(this.caelum, this.did, result.data.tokenApi, this.info.endpoint);
           this.parameters = (result.data.capability === 'admin') ? await this.sdk.call('parameter', 'getAll') : false;
           resolve(result.data);
         })
@@ -238,7 +247,7 @@ module.exports = class Organization {
   }
 
   async setSession(tokenApi, capability) {
-    this.sdk = new SDK(this.caelum, this.info.did, tokenApi, this.info.endpoint, capability);
+    this.sdk = new SDK(this.caelum, this.did, tokenApi, this.info.endpoint, capability);
     this.parameters = (capability === 'admin') ? await this.sdk.call('parameter', 'getAll') : false;
   }
 

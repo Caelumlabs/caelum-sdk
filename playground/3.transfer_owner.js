@@ -13,9 +13,9 @@ const init = async () => {
   const newKeys = await caelum.newBlockchainKeys();
   console.log(`Org admin Seed: ${newKeys.mnemonic}`);
   console.log(`Org admin Addr: ${newKeys.address}`);
-  await orgAdmin.transferOwnership(newKeys, process.env.TOKEN_ID);
+  await orgAdmin.transferOwnership(newKeys);
 
-  const balance = await caelum.getTokenBalance(process.env.TOKEN_ID, orgAdmin.keypair.address);
+  const balance = await caelum.getTokenBalance(process.env.TOKEN_DID, orgAdmin.keypair.address);
   console.log(`Balance ${orgAdmin.keypair.address} = ${balance} ${process.env.TOKEN_SYMBOL}`);
 
   // Disconnect.

@@ -19,13 +19,12 @@ const init = async () => {
     process.env.TAX_ID,
     2000,
     orgKeys,
-    process.env.TOKEN_ID,
     1000,
   );
 
   console.log(`Org admin DID: ${newOrg.did}`);
-
-  const balance = await caelum.getTokenBalance(process.env.TOKEN_ID, orgKeys.address);
+console.log(process.env.TOKEN_DID);
+  const balance = await caelum.getTokenBalance(process.env.TOKEN_DID, orgKeys.address);
   console.log(`Token = ${balance} ${process.env.TOKEN_SYMBOL}`);
 
   // Disconnect.
