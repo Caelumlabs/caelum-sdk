@@ -661,17 +661,17 @@ module.exports = class DIDs {
     let gasQty = senderData.data.free
     const info = await exec.api.tx.balances.transfer(newOwner, gasQty).paymentInfo(keypair)
     const existentialDeposit = await exec.api.consts.balances.existentialDeposit
-    if (gasQty > existentialDeposit) {
+    if (gasQty >= existentialDeposit) {
       gasQty = gasQty.sub(existentialDeposit)
     } else {
       console.log('Gas QTY is greater than existentialDeposit')
       console.log('Can not transfer any gas to destination')
       return false
     }
-    if (gasQty > info.partialFee) {
+    if (gasQty >= info.partialFee) {
       gasQty = gasQty.sub(info.partialFee)
     } else {
-      console.log('Gas QTY is greater than partialFee')
+      console.log('Gas QTY is greater than partialFee - QTY - %O, PartialFee - %O', gasQty, info.partialFee)
       console.log('Can not transfer any gas to destination')
       return false
     }
