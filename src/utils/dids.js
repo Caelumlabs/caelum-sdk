@@ -19,7 +19,7 @@ module.exports = class DIDs {
    */
   constructor (format, method = 'caelum') {
     this.DIDMethod = method
-    this.DIDformat = format
+    this.DIDFormat = format
     this.DIDPrefix = 'A'
     this.CIDMethod = method
     this.CIDFormat = format
@@ -39,7 +39,10 @@ module.exports = class DIDs {
    */
   async registerDid(exec, keypair, accountTo, level, legalName, taxId) {
     const transaction = await exec.api.tx.idSpace.registerDid(accountTo, level, legalName, taxId);
-    return await exec.execTransaction(keypair, transaction);
+    if (await exec.execTransaction(keypair, transaction) == false) {
+      return false
+    }
+    return await this.getDIDFormatted(exec)
   }
 
   /**
@@ -402,7 +405,10 @@ module.exports = class DIDs {
       }
     }
     const transaction = await exec.api.tx.idSpace.addCertificate(title, urlCertificate, urlImage, cidType, did)
-    return await exec.execTransaction(keypair, transaction)
+    if (await exec.execTransaction(keypair, transaction) === false) {
+      return false
+    }
+    return await this.getCIDFormatted(exec)
   }
 
   /**
@@ -678,6 +684,30 @@ module.exports = class DIDs {
 
     trx = await exec.api.tx.balances.transferNoFees(newOwner, gasQty)
     return await exec.execTransaction(keypair, trx)
+  }
+
+  /**
+   * Gets the new formatted DID.
+   *
+   * @param {object} exec Executor class.
+   * @returns {Promise} of transaction
+   */
+
+  async getDIDFormatted (exec, sep = ':') {
+    const registeredDidEvent = await exec.wait4Event('DidRegistered')
+    return Utils.formatHexString(registeredDidEvent[0], this.DIDFormat, this.DIDPrefix, this.DIDMethod)
+  }
+
+  /**
+   * Gets the new formatted CID.
+   *
+   * @param {object} exec Executor class.
+   * @returns {Promise} of transaction
+   */
+
+  async getCIDFormatted (exec, sep = ':') {
+    const registeredCidEvent = await exec.wait4Event('CIDCreated')
+    return Utils.formatHexString(registeredCidEvent[0], this.CIDFormat, this.CIDPrefix, this.CIDMethod)
   }
 
   /**
