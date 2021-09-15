@@ -79,7 +79,7 @@ module.exports = class User {
               peerDid: keys.Organization.keypair.public_key,
               secret: keys.Organization.keypair.private_key,
             };
-            return User.signSession(sessionIdString, org.did, keys);
+            return User.signSession(sessionIdString, org.did, this.connections[org.did]);
           })
           .then((signature) => axios.put(`${org.info.endpoint}auth/session`, {
             action: 'register',
