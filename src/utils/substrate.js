@@ -12,6 +12,7 @@ const Process = require('./process');
 const Tokens = require('./fungibles');
 const ClassNFTs = require('./classnfts');
 const Formats = require('./format');
+const Utils = require('./utils')
 
 /**
  * Javascript Class to interact with the Blockchain.
@@ -595,6 +596,11 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @returns {Promise} of transaction
    */
   async setTokenAndCostForProcess (tokenid, cost) {
+    // Check if token id is wellformed
+    tokenid = Utils.verifyTokenFormat(tokenid, this.format)
+    if (tokenid === false) {
+      return false
+    }
     const tokenIdAndCost = {
       startProcess: [tokenid, cost],
       startSubprocess: [tokenid, cost],
@@ -616,6 +622,11 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @returns {Promise} of transaction
    */
   async setTokenAndCostForDIDsAndCIDs (tokenid, cost) {
+    // Check if token id is wellformed
+    tokenid = Utils.verifyTokenFormat(tokenid, this.format)
+    if (tokenid === false) {
+      return false
+    }
     const tokenIdAndCost = {
       registerDid: [tokenid, cost],
       setStorageAddress: [tokenid, cost],

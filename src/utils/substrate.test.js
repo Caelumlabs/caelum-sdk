@@ -28,6 +28,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   let tokenid
   const format = Formats.STANDARD
   const prefix = 'A'
+  const cidPrefix = 'C'
   const sep = ':'
   const diddocHash = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
   const storageAddress = 'bafyreiecd7bahhf6ohlzg5wu4eshn655kqhgaguurupwtbnantf54kloem'
@@ -122,17 +123,14 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     const alice = blockchain.setKeyring(GENESIS_SEED_FROM)
     // Create token. Set Alice as Admin 
     // Create a new token
-    let result = await blockchain.createToken(alice)
-    expect(result).equal(true)
-    // Get the new created token id
-    const createdEvent = await blockchain.wait4Event('Created')
-    // Token ID is the first parameter of event
-    tokenid = createdEvent[0]
+    tokenid = await blockchain.createToken(alice)
+    console.log('Result - %O', tokenid)
+    expect(tokenid).not.equal(false)
     // Get the token details so far
     let tokenDetails = await blockchain.getTokenDetails(tokenid)
     expect(tokenDetails.owner).eql(alice)
     // Set Token metadata that identifies it
-    result = await blockchain.setTokenMetadata(tokenid, 'Caelum', 'Caeli', 0)
+    let result = await blockchain.setTokenMetadata(tokenid, 'Caelum', 'Caeli', 0)
     expect(result).equal(true)
     // Get the token metadata
     const tokenMetadata = await blockchain.getTokenMetadata(tokenid)
@@ -168,10 +166,11 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     // DID Owner should be the address of tempWallet
     const didDataJson = await blockchain.getDidData(registeredDidEvent[0])
     console.log('DID =', registeredDidEvent[0])
-    const didConverted = Utils.formatHexString(registeredDidEvent[0], blockchain.getDIDFormat().Format, prefix, 'caelum')
+    const fmt = blockchain.getDIDFormat()
+    const didConverted = Utils.formatHexString(registeredDidEvent[0], fmt.Format, fmt.Prefix, fmt.Method)
     console.log('DID converted =', didConverted)
     let didAgain 
-    console.log('blockchain.getDIDFormat().Format', blockchain.getDIDFormat())
+    console.log('blockchain.getDIDFormat()', blockchain.getDIDFormat())
     switch (blockchain.getDIDFormat().Format) {
       case Formats.STANDARD:
         didAgain = Utils.fromStandardToHex(didConverted)
@@ -340,7 +339,6 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   })
 
   it('Should add a Certificate to Blockchain', async () => {
-    console.log('Network name - %O', await blockchain.getNetworkName())
     blockchain.setKeyring(tempWallet.mnemonic)
     // Vec<u8> parameters must be entered as hex strings (e.g.: format 0xab67c8ff...)
     const result = await blockchain.addCertificate()
@@ -349,11 +347,41 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     // Promoter Account from even data should be address of tempwallet
     const registeredCidEvent = await blockchain.wait4Event('CIDCreated')
     const cid = registeredCidEvent[0]
+    console.log('CID =', cid)
+    const cidFmt = blockchain.getCIDFormat()
+    const cidConverted = Utils.formatHexString(registeredCidEvent[0], cidFmt.Format, cidFmt.Prefix, cidFmt.Method)
+    console.log('CID converted =', cidConverted)
+    let cidAgain 
+    console.log('blockchain.getCIDFormat().Format', blockchain.getCIDFormat())
+    switch (blockchain.getCIDFormat().Format) {
+      case Formats.STANDARD:
+        cidAgain = Utils.fromStandardToHex(cidConverted)
+        break
+      case Formats.HEXADECIMAL:
+        cidAgain = cidConverted.slice(2)
+        break
+      case Formats.BASE58:
+        cidAgain = Utils.fromBase58ToHex(cidConverted)
+        break
+      case Formats.DECIMAL:
+        cidAgain = Utils.fromStandardToHex(cidConverted)
+        break
+      case Formats.DEFAULT:
+        cidAgain = Utils.fromStandardToHex(cidConverted)
+        break
+      default:
+        cidAgain = Utils.fromStandardToHex(cidConverted)
+        break
+    }
+    console.log('CID Again =', cidAgain)
+
+
     expect(registeredCidEvent[1]).equal(tempWallet.address)
 
     // DID must be DID of the Owner because has not been provided
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
-    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, 'caelum')).equal(didPromoter)
+    const fmt =  blockchain.getDIDFormat()
+    expect(Utils.formatHexString(registeredCidEvent[2], fmt.Format, fmt.Prefix, fmt.Method)).equal(didPromoter)
   })
 
   it('Should add three new Certificates to Blockchain', async () => {
@@ -377,6 +405,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
   it('Should read all Certificates of a DID', async () => {
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
     const result = await blockchain.getCertificatesByDID(didPromoter)
+    // console.log('Certificates - %O', result)
     expect(result[0].data.did_owner).equal(didPromoter)
   })
 
@@ -391,7 +420,8 @@ describe('Test Blockchain Substrate Connection and functions', function () {
 
     // DID must be DID of the Owner
     const didPromoter = await blockchain.getDidFromOwner(tempWallet.address)
-    expect(Utils.formatHexString(registeredCidEvent[2], blockchain.getDIDFormat().Format, prefix, 'caelum')).equal(didPromoter)
+    const fmt = blockchain.getDIDFormat()
+    expect(Utils.formatHexString(registeredCidEvent[2], fmt.Format, fmt.Prefix, fmt.Method)).equal(didPromoter)
     // See result
     const res = await blockchain.getCertificatesByDID(didPromoter)
     if (res.length > 0) {
@@ -399,7 +429,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     }
   })
 
-  it.skip('Should read all DIDs', async () => {
+  it('Should read all DIDs', async () => {
     const result = await blockchain.getAllDidData()
     console.log(result)
   })
@@ -423,7 +453,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     console.log(await blockchain.getAllHashesForDid(tempWalletDid))
   })
 
-  it.skip('Should Remove a Hash', async () => {
+  it('Should Remove a Hash', async () => {
     blockchain.setKeyring(tempWallet.mnemonic)
     // Get the DID for tempWallet
     const tempWalletDid = await blockchain.getDidFromOwner()
@@ -469,7 +499,8 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     const tempWalletDid = await blockchain.getDidFromOwner(tempWallet.address)
     await blockchain.removeDid(tempWalletDid)
     const subs = await blockchain.wait4Event('DidRemoved')
-    expect(Utils.formatHexString(subs[1], blockchain.getDIDFormat().Format, prefix, 'caelum').eql(tempWalletDid))
+    const fmt = blockchain.getDIDFormat()
+    expect(Utils.formatHexString(subs[1], fmt.Format, fmt.Prefix, fmt.Method).eql(tempWalletDid))
   })
 
   it.skip('Should sweep Gas from Zelda to Alice', async () => {
@@ -481,7 +512,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     expect(zeldaBalance2).not.equal(zeldaBalance1)
   })
 
-  it.skip('Creates a new process and get some paths', async () => {
+  it('Creates a new process and get some paths', async () => {
     // Sets the keyring (so account address)
     const alice = blockchain.setKeyring(GENESIS_SEED_FROM)
     // Get DID for this account
@@ -490,7 +521,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     // This can be done solely by root that in this case is Alice
     await blockchain.setTokenAndCostForProcess(tokenid, 30)
     const tc = await blockchain.getTokenIdAndCosts()
-    expect(tc.start_process[0].toNumber()).equal(tokenid)
+    // expect(tc.start_process[0].toNumber()).equal(tokenid)
     // Get the account token data
     let tokenAccountData = await blockchain.getAccountTokenData(tokenid, alice)
     // Keep the old balance
@@ -657,7 +688,7 @@ describe('Test Blockchain Substrate Connection and functions', function () {
     console.log(util.inspect(fullProcessTree, { showHidden: false, depth: null }))
   })
 
-  it.skip('Creates some NFTs classes and instances and transfer ownership', async () => {
+  it('Creates some NFTs classes and instances and transfer ownership', async () => {
     // Sets the keyring (so account address)
     const alice = blockchain.setKeyring(GENESIS_SEED_FROM)
     // Create random number for a class

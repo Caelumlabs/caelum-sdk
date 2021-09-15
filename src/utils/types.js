@@ -26,6 +26,10 @@ module.exports = {
     Certificate: {
       // Release of this CID template.
       release: 'IdSpaceReleases',
+      // CID Version
+      cid_version: 'u8',
+      // Network
+      network_id: 'Vec<u8>',
       // Owner account the creates this CID.
       owner: 'AccountId',
       // Owner's DID.

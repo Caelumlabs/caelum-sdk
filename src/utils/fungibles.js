@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 
 const Utils = require('./utils');
-const { bufferToU8a } = require('@polkadot/util');
+const { u8aToHex } = require('@polkadot/util');
 const util = require('util');
 
 // Debug
@@ -65,7 +65,10 @@ module.exports = class Token {
 
   async createToken (exec, keypair, admin, minBalance) {
     const transaction = await exec.api.tx.assets.create(admin, minBalance, true)
-    return await exec.execTransaction(keypair, transaction)
+    if (await exec.execTransaction(keypair, transaction) === false) {
+      return false
+    }
+    return await this.getTokenId(exec)
   }
 
   /**
@@ -743,5 +746,20 @@ module.exports = class Token {
     }
     const accountData = await exec.api.query.assets.account(id, who);
     return JSON.parse(accountData);
+  }
+  
+  /**
+   * Gets the new formatted Token id.
+   *
+   * @param {object} exec Executor class.
+   * @returns {Promise} of transaction
+   */
+
+  async getTokenId (exec, sep = ':') {
+    const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+    const network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    const createdEvent = await exec.wait4Event('Created')
+    const tokenid = Utils.decimalToHex(createdEvent[0], 3)
+    return 'did' + sep + this.Method + sep + network + sep + this.Prefix + tokenid
   }
 };
