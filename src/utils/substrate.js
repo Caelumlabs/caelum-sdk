@@ -489,10 +489,10 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   async getCertificatesByDID(did) {
     const certificates = await this.dids.getCertificatesByDID(this.exec, did);
     for (let i = 0; i < certificates.length; i += 1) {
-      certificates[i].data.title = hexToString(certificates[0].data.title);
-      certificates[i].data.url_certificate = hexToString(certificates[0].data.url_certificate);
-      certificates[i].data.url_image = hexToString(certificates[0].data.url_image);
-      certificates[i].data.cid_type = hexToString(certificates[0].data.cid_type);
+      certificates[i].data.title = hexToString(certificates[i].data.title);
+      certificates[i].data.url_certificate = hexToString(certificates[i].data.url_certificate);
+      certificates[i].data.url_image = hexToString(certificates[i].data.url_image);
+      certificates[i].data.cid_type = hexToString(certificates[i].data.cid_type);
     }
     return certificates;
   }
