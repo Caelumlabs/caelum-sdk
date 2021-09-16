@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 const debug = require('debug')('did:debug:sub');
 const { Keyring } = require('@polkadot/api');
-const { stringToHex } = require('@polkadot/util');
+const { stringToHex, hexToString } = require('@polkadot/util');
 const { mnemonicGenerate, mnemonicValidate } = require('@polkadot/util-crypto');
 const { cryptoWaitReady } = require('@polkadot/util-crypto');
 const BlockchainInterface = require('./blockchain');
@@ -487,7 +487,14 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @returns {object} CID array
    */
   async getCertificatesByDID(did) {
-    return this.dids.getCertificatesByDID(this.exec, did);
+    const certificates = await this.dids.getCertificatesByDID(this.exec, did);
+    for (let i = 0; i < certificates.length; i += 1) {
+      certificates[i].data.title = hexToString(certificates[0].data.title);
+      certificates[i].data.url_certificate = hexToString(certificates[0].data.url_certificate);
+      certificates[i].data.url_image = hexToString(certificates[0].data.url_image);
+      certificates[i].data.cid_type = hexToString(certificates[0].data.cid_type);
+    }
+    return certificates;
   }
 
   /**
