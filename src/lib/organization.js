@@ -79,10 +79,10 @@ module.exports = class Organization {
   async getData() {
     const data = await this.blockchain.getDidData(this.did);
     this.owner = data.owner;
-	if (this.tokenId) {
+    if (this.tokenId) {
       const tokendata = await this.blockchain.getAccountTokenData(this.tokenId, data.owner);
       this.info.balance = tokendata.balance;
-	}
+    }
     const signer = await this.blockchain.getKey(this.did);
     this.signer = { publicKey: u8aToString(signer).toString() };
     const gasdata = await this.blockchain.addrState(this.owner);

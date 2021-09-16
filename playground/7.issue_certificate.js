@@ -22,6 +22,7 @@ const init = async () => {
 
   const validCredential = await orgAdmin.verifyCredential(signedCredential);
   console.log(`Validation: ${validCredential}`);
+  console.log(signedCredential);
 
   // Disconnect.
   await caelum.disconnect();
