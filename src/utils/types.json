@@ -31,6 +31,7 @@
     "cid_type": "Vec<u8>",
     "total_hids_issued": "u64",
     "is_frozen": "bool",
+    "timepoint_frozen_since": "Timepoint",
     "timepoint_valid_from": "Timepoint",
     "timepoint_valid_to": "Timepoint"
   },
@@ -54,6 +55,7 @@
     "cid_type": "Vec<u8>",
     "path": "Option<Vec<u8>>",
     "is_frozen": "bool",
+    "timepoint_frozen_since": "Timepoint",
     "timepoint_valid_from": "Timepoint",
     "timepoint_valid_to": "Timepoint"
   },
@@ -83,6 +85,7 @@
     "accumulator": "Option<Accumulator>",
     "info": "DIDInfo",
     "is_frozen": "bool",
+    "timepoint_frozen_since": "Timepoint",
     "timepoint_valid_from": "Timepoint",
     "timepoint_valid_to": "Timepoint"
   },

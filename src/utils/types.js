@@ -46,6 +46,8 @@ module.exports = {
       total_hids_issued: 'u64',
       // Certificate is frozen
       is_frozen: 'bool',
+      // Block is frozen since this timepoint
+      timepoint_frozen_since: 'Timepoint',
       // Block when this template CID was created.
       timepoint_valid_from: 'Timepoint',
       // Block when this template CID was invalidated. (0 means that it still valid).
@@ -71,6 +73,7 @@ module.exports = {
       cid_type: 'Vec<u8>',
       path: 'Option<Vec<u8>>',
       is_frozen: 'bool',
+      timepoint_frozen_since: 'Timepoint',
       timepoint_valid_from: 'Timepoint',
       timepoint_valid_to: 'Timepoint'
     },
@@ -100,6 +103,7 @@ module.exports = {
       accumulator: 'Option<Accumulator>',
       info: 'DIDInfo',
       is_frozen: 'bool',
+      timepoint_frozen_since: 'Timepoint',
       timepoint_valid_from: 'Timepoint',
       timepoint_valid_to: 'Timepoint'
     },
