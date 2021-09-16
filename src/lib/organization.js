@@ -50,7 +50,8 @@ module.exports = class Organization {
     const did = await this.blockchain.getDidFromOwner(keys.address);
     debug(`DID = ${did}`);
     debug(`Mnemonic = ${keys.mnemonic}`);
-    await this.blockchain.transferGas(keys.address, 1000000000000);
+    debug(`Address = ${keys.address}`);
+    await this.blockchain.transferGas(keys.address, 1000000000000000);
     await this.blockchain.transferToken(this.tokenId, keys.address, amount);
     const newOrg = new Organization(this.blockchain, did);
     newOrg.keys = keys;
@@ -176,12 +177,11 @@ module.exports = class Organization {
       },
     };
     const signedCredential = await W3C.signCredential(credential, issuer);
-	  console.log(this.did, signedCredential.proof.jws, certificateDid, type);
     await this.blockchain.putHash(
       this.did,
       signedCredential.proof.jws,
       certificateDid,
-	  type,
+      type,
     );
     await this.blockchain.wait4Event('CredentialAssigned');
     return signedCredential;
@@ -195,8 +195,7 @@ module.exports = class Organization {
   async verifyCredential(signedCredential) {
     const valid = await W3C.verifyCredential(signedCredential, this.signer.publicKey);
     const hash = await this.blockchain.getHash(signedCredential.proof.jws);
-    console.log(hash);
-    // const hashes = await this.blockchain.getAllHashesForDid(this.did);
+    // TODO : Verify
     return valid;
   }
 

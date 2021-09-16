@@ -18,7 +18,7 @@ const methods = {
     endpoint: 'user',
     methods: {
       add: { action: 'post', auth: true },
-      issue: { action: 'post', submethod: 'capacity', auth: true },
+      issue: { action: 'post', submethod: 'capability', auth: true },
       getAll: { action: 'get', auth: true },
       getOne: { action: 'get', auth: true },
       delete: { action: 'delete', auth: true },
@@ -100,18 +100,18 @@ module.exports = class SDK {
   /**
    * Constructor. It creates a User object.
    */
-  constructor(caelum, did, tokenApi, endpoint, capacity) {
+  constructor(caelum, did, tokenApi, endpoint, capability) {
     this.caelum = caelum;
     this.did = did;
     this.tokenApi = tokenApi;
     this.endpoint = endpoint;
-    this.capacity = capacity;
+    this.capability = capability;
   }
 
   call(api, call, extra = {}) {
     let promise; let
       endpoint;
-    return new Promise((resolve ) => {
+    return new Promise((resolve) => {
       if (methods[api] && methods[api].methods[call]) {
         const method = methods[api].methods[call];
         // Call parameters
@@ -123,7 +123,7 @@ module.exports = class SDK {
         // Build endpooint.
         endpoint = this.endpoint + methods[api].endpoint;
         if (method.submethod) endpoint += `/${method.submethod}`;
-        for (let i = 0; i < params.length; i++) endpoint += `/${params[i]}`;
+        for (let i = 0; i < params.length; i += 1) endpoint += `/${params[i]}`;
         // console.log(method.action + ' ' + endpoint)
         // API Method : GET, POST, PUT,  DELETE
         switch (method.action) {
@@ -142,6 +142,8 @@ module.exports = class SDK {
           case 'form':
             promise = axios.post(endpoint, form, { headers: form.getHeaders() });
             break;
+          default:
+            promise = null;
         }
         promise
           .then((res) => resolve(res.data))
@@ -163,9 +165,9 @@ module.exports = class SDK {
    * @return {object} User
    */
   getUser(userId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       axios.get(`${this.endpoint}user/${userId}`, { headers: { Authorization: `Bearer ${this.tokenApi}` } })
-        .then((res) => resolve(res.data)).catch((e) => resolve(false));
+        .then((res) => resolve(res.data)).catch(() => resolve(false));
     });
   }
 
@@ -182,15 +184,17 @@ module.exports = class SDK {
   }
 
   /**
-   * Add a new Capacity for a user (only admin)
+   * Add a new Capability for a user (only admin)
    *
-   * @param {object} formData New Capacity ({userId, email, capacity, department, location, document, threshold})
+   * @param {object} formData New Capability
+   *   {userId, email, capability, department, location, document, threshold}
    * @returns {boolean} Success or not
    */
-  async addCapacity(formData) {
+  async addCapability(formData) {
+    const postData = formData;
     return new Promise((resolve) => {
-      formData.subject = formData.subject.capacity + ((formData.subject.subject !== '') ? (`-${formData.subject.subject}`) : '');
-      axios.post(`${this.endpoint}user/capacity`, formData, { headers: { Authorization: `Bearer ${this.tokenApi}` } })
+      postData.subject = formData.subject.capability + ((formData.subject.subject !== '') ? (`-${formData.subject.subject}`) : '');
+      axios.post(`${this.endpoint}user/capability`, postData, { headers: { Authorization: `Bearer ${this.tokenApi}` } })
         .then((result) => resolve(result.data));
     });
   }
@@ -199,9 +203,9 @@ module.exports = class SDK {
    * Get a list of users.
    */
   getParameters() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       axios.get(`${this.endpoint}parameter`, { headers: { Authorization: `Bearer ${this.tokenApi}` } })
-        .then((res) => resolve(res.data)).catch((e) => resolve(false));
+        .then((res) => resolve(res.data)).catch(() => resolve(false));
     });
   }
 };
