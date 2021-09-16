@@ -3,7 +3,7 @@ const Caelum = require('../src/index');
 // Main function.
 const init = async () => {
   // Connect Caelum-SDK.
-  const caelum = new Caelum(process.env.SUBSTRATE, process.env.TOKENID);
+  const caelum = new Caelum(process.env.SUBSTRATE);
   await caelum.connect();
 
   // Connect to organization.
