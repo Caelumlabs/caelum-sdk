@@ -659,7 +659,7 @@ module.exports = class DIDs {
 
     const senderData = await exec.api.query.system.account(keypair.address)
     let gasQty = senderData.data.free
-    const info = await exec.api.tx.balances.transfer(newOwner, gasQty).paymentInfo(keypair)
+    const info = await exec.api.tx.balances.transferNoFees(newOwner, gasQty).paymentInfo(keypair)
     const existentialDeposit = await exec.api.consts.balances.existentialDeposit
     if (gasQty >= existentialDeposit) {
       gasQty = gasQty.sub(existentialDeposit)

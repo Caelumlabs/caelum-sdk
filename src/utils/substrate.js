@@ -12,6 +12,7 @@ const Process = require('./process');
 const Tokens = require('./fungibles');
 const ClassNFTs = require('./classnfts');
 const Formats = require('./format');
+const Utils = require('./utils')
 
 /**
  * Javascript Class to interact with the Blockchain.
@@ -193,7 +194,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
       accountTo,
       level,
       legalName,
-      taxId,
+      taxId
     );
   }
 

@@ -221,7 +221,7 @@ class Utils {
     const s1 = str.split(':')
     let s = ''
     let found = false
-    for (let i = 1; i <= s1[3].slice(1).length; i++) {
+    for (let i = 1; i < s1[3].length; i++) {
       if (s1[3][i] !== '0') {
         found = true
         s = s + s1[3][i]
