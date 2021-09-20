@@ -63,13 +63,13 @@ module.exports = class User {
       // Create new keys for the peerDID (connection ID)
       if (this.connections[org.did]) reject(new Error('organization already exists'));
       else {
-        this.orgs[org.did] = org;
         this.orgs[org.did] = {
           did: org.did,
           tokenId: org.tokenId,
           info: org.info,
           signer: org.signer,
           certificates: org.certificates,
+          endpoint: org.info.endpoint
         };
         this.connections[org.did] = {};
         this.caelum.newCertificateKeys()
@@ -151,7 +151,7 @@ module.exports = class User {
   async login(org, capability, _sessionIdString = '') {
     const { did } = org;
     const sessionIdString = (_sessionIdString === '')
-      ? (await this.orgs[did].getSession(capability)).sessionIdString
+      ? (await org.getSession(capability)).sessionIdString
       : _sessionIdString;
     const signature = await User.signSession(sessionIdString, did, this.connections[did]);
     const postData = {
@@ -161,7 +161,7 @@ module.exports = class User {
       credential: (capability === 'peerdid') ? false : this.findCredential(did, capability),
     };
     return new Promise((resolve) => {
-      axios.put(`${this.orgs[did].info.endpoint}auth/session`, postData)
+      axios.put(`${org.info.endpoint}auth/session`, postData)
         .then((session) => {
           this.sessions[did] = session.data;
           const sessionType = (capability === 'peerdid')
