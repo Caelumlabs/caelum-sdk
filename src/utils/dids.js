@@ -56,7 +56,7 @@ module.exports = class DIDs {
    */
   async setStorageAddress (exec, keypair, did, storageAddress) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -83,7 +83,7 @@ module.exports = class DIDs {
       did = u8aToHex('\x00')
     } else {
       // Check if DID is wellformed
-      did = Utils.verifyDIDString(did, this.DIDFormat)
+      did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
       if (did === false) {
         return false
       }
@@ -106,7 +106,7 @@ module.exports = class DIDs {
    */
   async changeOwner (exec, keypair, did, newOwner) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -127,12 +127,12 @@ module.exports = class DIDs {
    */
   async putHash (exec, keypair, did, credential, certificate, typ) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
     // Check if CID is wellformed
-    certificate = Utils.verifyDIDString(certificate, this.CIDFormat)
+    certificate = Utils.verifyDIDString(certificate, this.CIDMethod, this.CIDFormat)
     if (certificate === false) {
       return false
     }
@@ -153,7 +153,7 @@ module.exports = class DIDs {
    */
   async changeLegalNameOrTaxId (exec, keypair, did, legalName, taxId) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -190,7 +190,7 @@ module.exports = class DIDs {
     if (website === null) { website = '0x00' }
     if (endpoint === null) { endpoint = '0x00' }
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -209,7 +209,7 @@ module.exports = class DIDs {
    */
   async revokeHash (exec, keypair, did, credential) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -227,7 +227,7 @@ module.exports = class DIDs {
    */
   async removeDid (exec, keypair, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -244,7 +244,7 @@ module.exports = class DIDs {
    */
   async getDidData (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -285,7 +285,7 @@ module.exports = class DIDs {
    */
   async getOwnerFromDid (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -320,7 +320,7 @@ module.exports = class DIDs {
       did = this.getDidFromOwner(exec, this.keypair.address)
     }
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -343,7 +343,7 @@ module.exports = class DIDs {
       did = this.getDidFromOwner(exec, this.keypair.address)
     }
     // Check if Certificate is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did,  this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -361,7 +361,7 @@ module.exports = class DIDs {
    */
   async getStorageAddressHash (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -399,7 +399,7 @@ module.exports = class DIDs {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
     } else {
-      did = Utils.verifyDIDString(did, this.DIDFormat)
+      did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
       if (did === false) {
         return false
       }
@@ -426,13 +426,13 @@ module.exports = class DIDs {
     if (did === undefined || did === null) {
       did = u8aToHex('\x00')
     } else {
-      did = Utils.verifyDIDString(did, this.DIDFormat)
+      did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
       if (did === false) {
         return false
       }
     }
     // Check if CID is wellformed
-    cid = Utils.verifyDIDString(cid, this.CIDFormat)
+    cid = Utils.verifyDIDString(cid, this.CIDMethod, this.CIDFormat)
     if (cid === false) {
       return false
     }
@@ -500,7 +500,7 @@ module.exports = class DIDs {
    */
   async getCertificateByKey (exec, cid) {
     // Check if Certificate is wellformed
-    if (Utils.verifyDIDString(cid, this.CIDFormat) === false) {
+    if (Utils.verifyDIDString(cid, this.CIDMethod, this.CIDFormat) === false) {
       return false
     }
     const { internalDid } = Utils.structDid(cid)
@@ -518,7 +518,7 @@ module.exports = class DIDs {
    */
   async getCertificatesByDID (exec, did) {
     // Check if Certificate is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }
@@ -549,7 +549,7 @@ module.exports = class DIDs {
    */
   async getHash (exec, hash) {
     // Check if Credential/Hash wellformed
-    hash = Utils.verifyDIDString(hash, this.DIDFormat)
+    hash = Utils.verifyDIDString(hash, this.DIDMethod, this.DIDFormat)
     if (hash === false) {
       return false
     }
@@ -621,7 +621,7 @@ module.exports = class DIDs {
 
   async transferDidOwnershipGasAndTokens (exec, keypair, did, newOwner, tokenId, gasAmount, tokenAmount) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.DIDFormat)
+    did = Utils.verifyDIDString(did, this.DIDMethod, this.DIDFormat)
     if (did === false) {
       return false
     }

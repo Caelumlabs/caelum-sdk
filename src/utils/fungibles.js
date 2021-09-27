@@ -93,8 +93,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceCreateToken(exec, keypair, id, owner, isSufficient, minBalance) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -118,8 +122,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async destroyToken(exec, keypair, id, witness) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -142,8 +150,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async mintToken(exec, keypair, id, beneficiary, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -170,8 +182,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async burnToken(exec, keypair, id, who, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -200,8 +216,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferToken(exec, keypair, id, target, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -229,8 +249,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferTokenKeepAlive(exec, keypair, id, target, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -261,8 +285,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceTransferToken(exec, keypair, id, source, dest, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -284,8 +312,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async freezeAccountForToken(exec, keypair, id, who) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -307,8 +339,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async unfreezeAccountForToken(exec, keypair, id, who) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -328,8 +364,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async freezeToken(exec, keypair, id) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -349,8 +389,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async unfreezeToken(exec, keypair, id) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -372,8 +416,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferTokenOwnership(exec, keypair, id, owner) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -399,8 +447,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async setTokenTeam(exec, keypair, id, issuer, admin, freezer) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -430,8 +482,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async setTokenMetadata(exec, keypair, id, name, symbol, decimals) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -453,8 +509,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async clearTokenMetadata(exec, keypair, id) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -482,8 +542,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceSetTokenMetadata(exec, keypair, id, name, symbol, decimals, isFrozen) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -504,8 +568,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceClearTokenMetadata(exec, keypair, id) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -544,8 +612,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceTokenStatus(exec, keypair, id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -577,8 +649,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async approveTokenTransfer(exec, keypair, id, delegate, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -603,8 +679,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async cancelApprovalTokenTransfer(exec, keypair, id, delegate) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -630,8 +710,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async forceCancelApprovalTokenTransfer(exec, keypair, id, owner, delegate) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -663,8 +747,12 @@ module.exports = class Token {
    * @returns {Promise} of transaction
    */
   async transferTokenApproval (exec, keypair, id, owner, destination, amount) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -709,8 +797,12 @@ module.exports = class Token {
    * @returns {Promise} of Transaction
    */
   async getTokenDetails(exec, id) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -726,8 +818,12 @@ module.exports = class Token {
    * @returns {Promise} of Transaction
    */
   async getTokenMetadata(exec, id) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
@@ -744,15 +840,19 @@ module.exports = class Token {
    * @returns {Promise} of Transaction
    */
   async getAccountTokenData(exec, id, who) {
+    if (this.network === '') {
+      const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+      this.network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    }
     // Check if token id is wellformed
-    id = Utils.verifyTokenFormat(id, this.format)
+    id = Utils.verifyTokenFormat(id, this.network, this.Method, this.format)
     if (id === false) {
       return false
     }
     const accountData = await exec.api.query.assets.account(id, who);
     return JSON.parse(accountData);
   }
-  
+
   /**
    * Gets the new formatted Token id.
    *
@@ -764,7 +864,7 @@ module.exports = class Token {
     const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
     const network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
     const createdEvent = await exec.wait4Event('Created')
-    const tokenid = Utils.decimalToHex(createdEvent[0], 3)
+    const tokenid = Utils.decimalToDecimal(createdEvent[0], 3)
     return 'did' + sep + this.Method + sep + network + sep + this.Prefix + tokenid
   }
 };

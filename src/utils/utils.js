@@ -70,17 +70,31 @@ class Utils {
    * Verify correct token hex string
    *
    * @param {string} str source
+   * @param {string} network network id
+   * @param {string} method method
    * @param {string} format source string format
    * @returns {boolean} True if string is correct
    */
-  static verifyTokenFormat (str, format) {
+  static verifyTokenFormat (str, network, method, format) {
     if (!format) {
       format = Formats.DEFAULT
     }
     let s = str
     if (str.includes(':')) {
       const s1 = str.split(':')
+      if (s1.length < 3) {
+        return false
+      }
+      if (s1[0] !== 'did') {
+        return false
+      }
+      if (s1[1] !== method) {
+        return false
+      }
       if (s1.length === 4) {
+        if (s1[2] !== network) {
+          return false
+        }
         s = s1[3]
       } else {
         if (s1.length === 3) {
@@ -104,23 +118,33 @@ class Utils {
         str = str.slice(0)
         break
     }
-    return parseInt(this.verifyHexString('0x' + str), 16)
+    return parseInt(this.verifyDecimalString(str), 10)
   }
 
   /**
    * Verify correct hex string
    *
    * @param {string} str source
+   * @param {string} method method
    * @param {string} format source string format
    * @returns {boolean} True if string is correct
    */
-  static verifyDIDString (str, format) {
+  static verifyDIDString (str, method, format) {
     if (!format) {
       format = Formats.DEFAULT
     }
     let s = str
     if (str.includes(':')) {
       const s1 = str.split(':')
+      if (s1.length < 3) {
+        return false
+      }
+      if (s1[0] !== 'did') {
+        return false
+      }
+      if (s1[1] !== method) {
+        return false
+      }
       if (s1.length === 4) {
         s = s1[3]
       } else {
@@ -186,8 +210,32 @@ class Utils {
     return str
   }
 
+  /**
+   * Verify correct  decimal
+   *
+   * @param {string} str source
+   * @returns {boolean} True if string is correct
+   */
+  static verifyDecimalString (str) {
+    const pattern = /[0-9]/gi
+    const result = str.match(pattern)
+    if (result.length !== str.length) {
+      return false
+    }
+    return str
+  }
+
   static decimalToHex (d, padding) {
     let hex = Number(d).toString(16)
+    padding = typeof (padding) === 'undefined' || padding === null ? padding = 2 : padding
+    while (hex.length < padding) {
+      hex = '0' + hex
+    }
+    return hex
+  }
+
+  static decimalToDecimal (d, padding) {
+    let hex = Number(d).toString(10)
     padding = typeof (padding) === 'undefined' || padding === null ? padding = 2 : padding
     while (hex.length < padding) {
       hex = '0' + hex
@@ -204,10 +252,14 @@ class Utils {
    */
   static fromStandardToHex (str, sep) {
     const s = str.split(':')
+    let s3 = s[3].slice(1).replace(/^0+|"+$/g, '')
+    if (s3.length % 2 !== 0) {
+      s3 = '0' + s3
+    }
     return '0x' + Utils.decimalToHex(1) +
                   Utils.decimalToHex(s[2].length) +
                   this.stringToU8aHex(s[2]) +
-                  s[3].slice(1)
+                  s3
   }
 
   /**
@@ -219,18 +271,7 @@ class Utils {
    */
   static fromTokenStandardToHex (str, sep) {
     const s1 = str.split(':')
-    let s = ''
-    let found = false
-    for (let i = 1; i < s1[3].length; i++) {
-      if (s1[3][i] !== '0') {
-        found = true
-        s = s + s1[3][i]
-      } else {
-        if (found) {
-          s = s1[3][i]
-        }
-      }
-    }
+    let s = s1[3].slice(1).replace(/^0+|"+$/g, '')
     if (s.length % 2 !== 0) {
       s = '0' + s
     }
@@ -310,7 +351,7 @@ class Utils {
     const s = str.split(':')
     return u8aToHex(this.fromBase58(s[2].slice(1)))
   }
-  
+
   /**
    * Convert any Token from Base58 to Hexadecimal
    *

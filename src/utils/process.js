@@ -58,7 +58,7 @@ module.exports = class Process {
    */
   async startProcess (exec, keypair, did, hash) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.format)
+    did = Utils.verifyDIDString(did, this.Method, this.format)
     if (did === false) {
       return false
     }
@@ -85,7 +85,7 @@ module.exports = class Process {
    */
   async startSubprocess (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.format)
+    did = Utils.verifyDIDString(did, this.Method, this.format)
     if (did === false) {
       return false
     }
@@ -113,7 +113,7 @@ module.exports = class Process {
    */
   async startStep (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.format)
+    did = Utils.verifyDIDString(did, this.Method, this.format)
     if (did === false) {
       return false
     }
@@ -141,7 +141,7 @@ module.exports = class Process {
    */
   async addDocument (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.format)
+    did = Utils.verifyDIDString(did, this.Method, this.format)
     if (did === false) {
       return false
     }
@@ -169,7 +169,7 @@ module.exports = class Process {
    */
   async addAttachment (exec, keypair, did, hash, parentHash) {
     // Check if DID is wellformed
-    did = Utils.verifyDIDString(did, this.format)
+    did = Utils.verifyDIDString(did, this.Method, this.format)
     if (did === false) {
       return false
     }
