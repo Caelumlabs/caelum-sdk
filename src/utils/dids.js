@@ -626,7 +626,11 @@ module.exports = class DIDs {
       return false
     }
     // Check if token id is wellformed
-    tokenId = Utils.verifyTokenFormat(tokenId, this.DIDFormat)
+
+    const CaelumNetwork = await exec.api.query.idSpace.caelumNetworkId()
+    const network = Utils.stringU8aToString(u8aToHex(CaelumNetwork).slice(2))
+    // Check if token id is wellformed
+    tokenId = Utils.verifyTokenFormat(tokenId, network, this.DIDMethod, this.DIDFormat)
     if (tokenId === false) {
       return false
     }
