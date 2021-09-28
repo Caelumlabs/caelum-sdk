@@ -4,8 +4,6 @@ const { hexToString, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
 const SDK = require('./sdk');
 
-const TOKENID = 'did:caelum:rigel:T001';
-
 /**
  * Schema.org: Organization.
  * URL https://schema.org/Organization
@@ -16,7 +14,7 @@ module.exports = class Organization {
    */
   constructor(blockchain, did = false) {
     this.did = did;
-    this.tokenId = TOKENID;
+    this.tokenId = '';
     this.seed = '';
     this.keypair = {};
     this.info = {};
