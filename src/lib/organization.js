@@ -4,6 +4,8 @@ const { hexToString, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
 const SDK = require('./sdk');
 
+const TOKENID = 'did:caelum:rigel:T001';
+
 /**
  * Schema.org: Organization.
  * URL https://schema.org/Organization
@@ -14,7 +16,7 @@ module.exports = class Organization {
    */
   constructor(blockchain, did = false) {
     this.did = did;
-    this.tokenId = '';
+    this.tokenId = TOKENID;
     this.seed = '';
     this.keypair = {};
     this.info = {};
@@ -39,6 +41,15 @@ module.exports = class Organization {
     // Mint tokens.
     await this.blockchain.mintToken(this.tokenId, this.keypair.address, amount);
     return this.tokenId;
+  }
+
+  /*
+   * transferToken
+   * Transfer the amount of tokens to the wallet address
+   *
+   */
+  async transferToken(tokenId, address, amount) {
+    await this.blockchain.transferToken(tokenId, address, amount);
   }
 
   async registerOrganization(legalName, taxId, level, keys, amount) {

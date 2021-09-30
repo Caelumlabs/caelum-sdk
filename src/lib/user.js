@@ -102,6 +102,19 @@ module.exports = class User {
     });
   }
 
+  /**
+   * Register a new wallet
+   *
+   */
+   async registerWallet() {
+    // Create new wallet.
+    const userKeys = await this.caelum.newBlockchainKeys();
+    //console.log(`Wallet Seed: ${userKeys.mnemonic}`);
+    //console.log(`Wallet Addr: ${userKeys.address}`);
+    
+    return userKeys;
+  }
+
   /*
    * Claim a notification -> get a certificate
    *
