@@ -222,7 +222,7 @@ module.exports = class Organization {
   }
 
   async startSdk() {
-    this.sdk = new SDK(this.caelum, this.did, '', this.info.endpoint, 'peerdid');
+    this.sdk = new SDK(this.caelum, this.did, '', this.info.endpoint, 'peerDid');
   }
 
   waitSession(sessionIdString) {
