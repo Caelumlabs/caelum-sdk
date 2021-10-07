@@ -39,8 +39,8 @@ module.exports = class User {
       const credential = {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         type: ['VerifiableCredential', 'Session'],
-        issuer: `did:peerdid:${keys.peerDid}`,
-        credentialSubject: { did: `did:caelum:${did}`, sessionIdString },
+        issuer: `did:peerDid:${keys.peerDid}`,
+        credentialSubject: { did: did, sessionIdString },
         issuanceDate: new Date().toISOString(),
       };
       const keypair = { public_key: keys.peerDid, private_key: keys.secret };
@@ -60,7 +60,7 @@ module.exports = class User {
    */
   async register(org, sessionIdString, secretCode) {
     return new Promise((resolve, reject) => {
-      // Create new keys for the peerDID (connection ID)
+      // Create new keys for the peerDid (connection ID)
       if (this.connections[org.did]) reject(new Error('organization already exists'));
       else {
         this.orgs[org.did] = {
@@ -158,13 +158,13 @@ module.exports = class User {
       action: 'login',
       signature,
       approved: true,
-      credential: (capability === 'peerdid') ? false : this.findCredential(did, capability),
+      credential: (capability === 'peerDid') ? false : this.findCredential(did, capability),
     };
     return new Promise((resolve) => {
       axios.put(`${org.info.endpoint}auth/session`, postData)
         .then((session) => {
           this.sessions[did] = session.data;
-          const sessionType = (capability === 'peerdid')
+          const sessionType = (capability === 'peerDid')
             ? false
             : this.sessions[did].signedCredential.credentialSubject.capability.type;
           return org.setSession(
