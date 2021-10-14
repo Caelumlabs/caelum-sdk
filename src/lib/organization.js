@@ -4,8 +4,6 @@ const { hexToString, u8aToString } = require('@polkadot/util');
 const W3C = require('../utils/zenroom');
 const SDK = require('./sdk');
 
-const TOKENID = 'did:caelum:rigel:T001';
-
 /**
  * Schema.org: Organization.
  * URL https://schema.org/Organization
@@ -14,13 +12,14 @@ module.exports = class Organization {
   /**
    * Constructor. It creates an Organization object.
    */
-  constructor(blockchain, did = false) {
+  constructor(blockchain, did = false, network = 'development') {
     this.did = did;
-    this.tokenId = TOKENID;
+    this.tokenId = `did:caelum:${network}:T001`;
     this.seed = '';
     this.keypair = {};
     this.info = {};
     this.blockchain = blockchain;
+    this.network = network;
   }
 
   async loadFromSeed(seed) {
@@ -53,7 +52,7 @@ module.exports = class Organization {
     debug(`Address = ${keys.address}`);
     await this.blockchain.transferGas(keys.address, 1000000000000000);
     await this.blockchain.transferToken(this.tokenId, keys.address, amount);
-    const newOrg = new Organization(this.blockchain, did);
+    const newOrg = new Organization(this.blockchain, did, this.network);
     newOrg.keys = keys;
     return newOrg;
   }

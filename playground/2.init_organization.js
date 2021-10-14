@@ -3,7 +3,7 @@ const Caelum = require('../src/index');
 // Main function.
 const init = async () => {
   // Connect Caelum-SDK.
-  const caelum = new Caelum(process.env.SUBSTRATE);
+  const caelum = new Caelum(process.env.SUBSTRATE, process.env.NETWORK);
   await caelum.connect();
 
   // Create new organization.
@@ -21,9 +21,8 @@ const init = async () => {
     orgKeys,
     1000,
   );
-
   console.log(`Org admin DID: ${newOrg.did}`);
-console.log(process.env.TOKEN_DID);
+
   const balance = await caelum.getTokenBalance(process.env.TOKEN_DID, orgKeys.address);
   console.log(`Token = ${balance} ${process.env.TOKEN_SYMBOL}`);
 

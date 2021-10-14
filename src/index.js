@@ -14,9 +14,10 @@ module.exports = class Caelum {
    *
    * @param {string} url BigchainDB server API
    */
-  constructor(blockchainUrl) {
+  constructor(blockchainUrl, network = 'development') {
     this.blockchain = new Blockchain(blockchainUrl);
     this.crypto = Crypto;
+    this.network = network;
   }
 
   async connect(userJson = false, did = false) {
@@ -54,7 +55,7 @@ module.exports = class Caelum {
     return tokenDetails;
   }
 
-  async transferTokens(seed, tokenId, amount, toAddr) {
+  async transferTokens(tokenId, amount, toAddr) {
     await this.blockchain.transferToken(tokenId, toAddr, amount);
   }
 
@@ -64,13 +65,13 @@ module.exports = class Caelum {
   }
 
   async getOrganizationFromSeed(seed) {
-    const org = new Organization(this.blockchain);
+    const org = new Organization(this.blockchain, false, this.network);
     await org.loadFromSeed(seed);
     return org;
   }
 
   async getOrganizationFromDid(did) {
-    const org = new Organization(this.blockchain, did);
+    const org = new Organization(this.blockchain, did, this.network);
     await org.getData();
     return org;
   }
