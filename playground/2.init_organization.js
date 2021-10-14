@@ -23,6 +23,7 @@ const init = async () => {
   );
   console.log(`Org admin DID: ${newOrg.did}`);
 
+  console.log(process.env.TOKEN_DID);
   const balance = await caelum.getTokenBalance(process.env.TOKEN_DID, orgKeys.address);
   console.log(`Token = ${balance} ${process.env.TOKEN_SYMBOL}`);
 
