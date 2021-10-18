@@ -3,7 +3,7 @@ const Caelum = require('../src/index');
 // Main function.
 const init = async () => {
   // Connect Caelum-SDK.
-  const caelum = new Caelum(process.env.SUBSTRATE);
+  const caelum = new Caelum(process.env.SUBSTRATE, process.env.NETWORK);
   await caelum.connect();
   // Connect ROOT Organization.
   const root = await caelum.getOrganizationFromSeed(process.env.ROOT_SEED);
@@ -13,7 +13,6 @@ const init = async () => {
     process.env.TOKEN_SYMBOL,
     1000000000,
   );
-  console.log('get Detail');
   const token = await caelum.getTokenDetails(tokenId);
   console.log('Token Details', token);
 

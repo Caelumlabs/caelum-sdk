@@ -3,11 +3,11 @@ const Caelum = require('../src/index');
 // Main function.
 const init = async () => {
   // Connect Caelum-SDK.
-  const caelum = new Caelum(process.env.SUBSTRATE);
+  const caelum = new Caelum(process.env.SUBSTRATE, process.env.NETWORK);
   await caelum.connect();
 
   // Connect to organization.
-  console.log('DID',process.env.ORG_DID);
+  console.log('DID', process.env.ORG_DID);
   const orgAdmin = await caelum.getOrganizationFromDid(process.env.ORG_DID);
   console.log(orgAdmin.info);
   console.log(orgAdmin.certificates);
