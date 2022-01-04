@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const debug = require('debug')('did:debug:sub');
 // const BlockchainInterface = require('./blockchain');
 const { ApiPromise, WsProvider } = require('@polkadot/api');
@@ -17,6 +18,7 @@ module.exports = class Executor {
   constructor(server) {
     this.providerWS = server;
     this.api = false;
+    this.connected = false;
   }
 
   /**
@@ -46,11 +48,89 @@ module.exports = class Executor {
   }
 
   /**
+   * Extended Connect with the Blockchain.
+   *
+   * @returns {boolean} success
+   */
+  async simpleConnect(retries) {
+    debug(`connecting to ${this.providerWS}`);
+    this.provider = new WsProvider(this.providerWS, 0);
+
+    // Get the types defined
+    const types = SubstrateBlockchainTypes;
+    types.provider = this.provider;
+    this.api = new ApiPromise(types);
+
+    this.api.on('connected', () => {
+      console.log('Connected');
+      this.connected = true;
+    });
+
+    this.api.on('disconnected', () => {
+      console.log('DisConnected');
+      this.connected = false;
+    });
+
+    this.api.on('ready', (event) => {
+      this.connected = true;
+    });
+
+    this.api.on('error', (event) => {
+      this.connected = false;
+    });
+
+    await this.api.connect().catch((e) => {
+      // do nothing
+    });
+
+    await this.api.isReadyOrError.catch((e) => {
+      if (retries > 0) {
+        this.retryConnect().catch(() => {});
+      }
+    });
+
+    await cryptoWaitReady();
+
+    const [chain, nodeName, nodeVersion] = await Promise.all([
+      this.api.rpc.system.chain(),
+      this.api.rpc.system.name(),
+      this.api.rpc.system.version(),
+    ]);
+
+    debug(`Connected to chain ${chain} - ${nodeName} v${nodeVersion}`);
+    return this.api;
+  }
+
+  async retryConnect(retries = 5) {
+    let maxRetries = retries;
+    await this.api.connect().catch(() => {});
+    await this.api.isReadyOrError.catch((e) => {
+      maxRetries -= 1;
+      console.log('MaxRetries -> %O', retries);
+      if (!this.connected && maxRetries > 0) {
+        setTimeout(() => {
+          this.retryConnect(maxRetries).catch(() => {// does not throw
+          });
+        }, 2500);
+      } else {
+        throw e;
+      }
+    });
+  }
+
+  /**
    * Disconnect from Blockchain.
    */
-  disconnect() {
-    this.provider.unsubscribe();
-    this.provider.disconnect();
+  async disconnect() {
+    await this.provider.unsubscribe();
+    await this.provider.disconnect();
+  }
+
+  /**
+   * Check if Blockchain is connected.
+   */
+  isConnected() {
+    return this.connected;
   }
 
   /**
@@ -60,7 +140,7 @@ module.exports = class Executor {
    * @returns {Array} array of CIDs
    */
   async getMetadata() {
-    return await this.api.rpc.state.getMetadata();
+    await this.api.rpc.state.getMetadata();
   }
 
   /**
@@ -157,29 +237,29 @@ module.exports = class Executor {
   }
 
   getStatus (status) {
-  if (status.isFuture) { return 'Is Future'}
-  if (status.isReady) {return 'Is Ready'}
-  if (status.isBroadcast) { return 'Is broadcast'}
-  if (status.isInBlock) { return 'Is Inblock'}
-  if (status.isRetracted) {return 'Is retracted'}
-  if (status.isFinalityTimeout) { return 'Is FinalityTimeout'}
-  if (status.isFinalized) {return 'Is finalized'}
-  if (status.isUsurped) { return 'Is Usurped'}
-  if (status.isDropped) {return 'Is dropped'}
-  if (status.isInvalid) {return 'Is invalid'}
-  return 'Else'
+    if (status.isFuture) { return 'Is Future'}
+    if (status.isReady) {return 'Is Ready'}
+    if (status.isBroadcast) { return 'Is broadcast'}
+    if (status.isInBlock) { return 'Is Inblock'}
+    if (status.isRetracted) {return 'Is retracted'}
+    if (status.isFinalityTimeout) { return 'Is FinalityTimeout'}
+    if (status.isFinalized) {return 'Is finalized'}
+    if (status.isUsurped) { return 'Is Usurped'}
+    if (status.isDropped) {return 'Is dropped'}
+    if (status.isInvalid) {return 'Is invalid'}
+    return 'Else'
   }
 
   errorType (error) {
-  if (error.isOther) { return 'isOther' }
-  if (error.isCannotLookup) { return 'isCannotLookup' }
-  if (error.isBadOrigin) { return 'isBadOrigin' }
-  if (error.isModule) { return 'isModule' }
-  if (error.isConsumerRemaining) { return 'isConsumerRemaining' }
-  if (error.isNoProviders) { return 'isNoProviders' }
-  if (error.isToken) { return 'isToken' }
-  if (error.isArithmetic) { return 'isArithmetic' }
-  return 'Other'
+    if (error.isOther) { return 'isOther' }
+    if (error.isCannotLookup) { return 'isCannotLookup' }
+    if (error.isBadOrigin) { return 'isBadOrigin' }
+    if (error.isModule) { return 'isModule' }
+    if (error.isConsumerRemaining) { return 'isConsumerRemaining' }
+    if (error.isNoProviders) { return 'isNoProviders' }
+    if (error.isToken) { return 'isToken' }
+    if (error.isArithmetic) { return 'isArithmetic' }
+    return 'Other'
   }
 
   async executeTransaction (keypair, transaction) {

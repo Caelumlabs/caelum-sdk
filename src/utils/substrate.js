@@ -1,4 +1,6 @@
-/* eslint-disable no-async-promise-executor */
+/* eslint-disable class-methods-use-this */
+/* eslint-disable max-len */
+/* eslint-disable linebreak-style */
 const debug = require('debug')('did:debug:sub');
 const { Keyring } = require('@polkadot/api');
 const { stringToHex, hexToString } = require('@polkadot/util');
@@ -50,10 +52,31 @@ module.exports = class SubstrateLib extends BlockchainInterface {
   }
 
   /**
+   * Simple Connect with the Blockchain.
+   *
+   * @returns {boolean} success
+   */
+  async simpleConnect(retries = 0) {
+    const result = await this.exec.simpleConnect(retries);
+
+    if (result === undefined || result === null) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Disconnect from Blockchain.
    */
-  disconnect() {
-    this.exec.disconnect();
+  async disconnect() {
+    await this.exec.disconnect();
+  }
+
+  /**
+   * Check if Blockchain is connected.
+   */
+  isConnected() {
+    return this.exec.isConnected();
   }
 
   /**
@@ -429,8 +452,8 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @param {string} did DID to assign the new CID (Either null or Must exists)
    * @returns {Promise} of transaction
    */
-  async addCertificate (title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
-    return this.dids.addCertificate(this.exec, this.keypair, title, urlCertificate, urlImage, cidType, did)
+  async addCertificate(title = null, urlCertificate = null, urlImage = null, cidType = null, did = null) {
+    return this.dids.addCertificate(this.exec, this.keypair, title, urlCertificate, urlImage, cidType, did);
   }
 
   /**
@@ -514,7 +537,7 @@ module.exports = class SubstrateLib extends BlockchainInterface {
    * @returns {Array} array of Credentials/Hashes
    */
   async getAllHashesForDid(did) {
-    return await this.dids.getAllHashesForDid(this.exec, did);
+    return this.dids.getAllHashesForDid(this.exec, did);
   }
 
   /**

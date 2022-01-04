@@ -12,9 +12,9 @@ module.exports = class Organization {
   /**
    * Constructor. It creates an Organization object.
    */
-  constructor(blockchain, did = false, network = 'development') {
+  constructor(blockchain, did = false, network = 'development', tokenId = 'T001') {
     this.did = did;
-    this.tokenId = `did:caelum:${network}:T001`;
+    this.tokenId = `did:${blockchain.tokens.Method}:${network}:${tokenId}`;
     this.seed = '';
     this.keypair = {};
     this.info = {};

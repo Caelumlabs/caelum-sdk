@@ -23,14 +23,22 @@ module.exports = class Caelum {
   async connect(userJson = false, did = false) {
     await this.blockchain.connect();
     const user = (userJson !== false) ? await this.newUser(userJson) : false;
-    const idspace = (did !== false ) ? await this.getOrganizationFromDid(did) : false;
+    const idspace = (did !== false) ? await this.getOrganizationFromDid(did) : false;
     if (user && idspace) await user.login(idspace, 'admin');
     if (!user && idspace) await idspace.startSdk();
     return {user, idspace};
   }
 
+  async simpleConnect() {
+    await this.blockchain.simpleConnect();
+  }
+
   async disconnect() {
     await this.blockchain.disconnect();
+  }
+
+  isConnected() {
+    return this.blockchain.isConnected();
   }
 
   async newBlockchainKeys() {
