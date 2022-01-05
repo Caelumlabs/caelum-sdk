@@ -103,24 +103,14 @@ module.exports = class MQTT {
   }
 
   /**
-   * Connect with the MQTT Server/Broker.
+   * Subscribe to a MQTT topic.
    *
    * @returns {boolean} success
    */
   subscribe(topic) {
-    // let retries = this.args.maxRetries;
-    // while (!this.isConnected && retries > 0) {
-    //   retries -= 1;
-    //   await this.delay();
-    // };
     const subTopic = topic || this.args.topic;
-    if (this.args.credential) {
-      this.args.username = '';
-      this.args.password = this.args.credential;
-    }
 
     this.client.subscribe(subTopic, { qos: this.args.qos }, (err, result) => {
-      console.log('client subscribe');
       if (err) {
         console.log(err);
       }
@@ -130,6 +120,17 @@ module.exports = class MQTT {
         }
       });
     });
+  }
+
+  /**
+   * Unsubscribe from an MQTT topicr.
+   *
+   * @returns {boolean} success
+   */
+  unsubscribe(topic) {
+    const subTopic = topic || this.args.topic;
+
+    this.client.unsubscribe(subTopic);
   }
 
   /**

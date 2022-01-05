@@ -111,21 +111,11 @@ module.exports = class MQTTAsync {
    * @returns {boolean} success
    */
   async subscribe(topic) {
-    // let retries = this.args.maxRetries;
-    // while (!this.isConnected && retries > 0) {
-    //   retries -= 1;
-    //   await this.delay();
-    // };
     const subTopic = topic || this.args.topic;
-    if (this.args.credential) {
-      this.args.username = '';
-      this.args.password = this.args.credential;
-    }
 
     let result;
     try {
       result = await this.client.subscribe(subTopic, { qos: 3 });      // this.args.qos
-      console.log('Subscribed ', result);
     } catch (err) {
       console.log(err);
     }
@@ -135,6 +125,17 @@ module.exports = class MQTTAsync {
         console.log('subscription negated to', sub.topic, 'with code', sub.qos);
       }
     });
+  }
+
+  /**
+   * Unsubscribe from an MQTT topicr.
+   *
+   * @returns {boolean} success
+   */
+  async unsubscribe(topic) {
+    const subTopic = topic || this.args.topic;
+
+    await this.client.unsubscribe(subTopic);
   }
 
   /**
