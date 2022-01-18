@@ -202,10 +202,8 @@ The arguments are:
   * `protocolId`: `'MQTT'`
   * `protocolVersion`: `4`
   * `clean`: `true`, set to false to receive QoS 1 and 2 messages while offline
-  * `reconnectPeriod`: `1000` milliseconds, interval between two
-    reconnections. Disable auto reconnect by setting to `0`.
-  * `connectTimeout`: `30 * 1000` milliseconds, time to wait before a
-    CONNACK is received
+  * `reconnectPeriod`: `1000` milliseconds, interval between two reconnections. Disable auto reconnect by setting to `0`.
+  * `connectTimeout`: `30 * 1000` milliseconds, time to wait before a CONNACK is received
   * `username`: the username required by your broker, if any
   * `password`: the password required by your broker, if any
   * `incomingStore`: a [Store](#store) for the incoming packets

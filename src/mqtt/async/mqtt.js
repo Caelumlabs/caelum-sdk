@@ -51,19 +51,19 @@ module.exports = class MQTTAsync {
     this.client = null;
     this.isConnected = false;
 
-    // Handlers
+    // Event Handlers
     this.handleConnect = () => {};
     this.handleDisconnect = () => {};
     this.handleMessage = () => {};
     this.handleError = () => {};
   }
 
-  // MQTT execution related functions
+  // MQTT asynchronous execution of related functions
 
   /**
    * Connect with the MQTT Server/Broker.
    *
-   * @returns {boolean} success
+   * @returns {object} MQTT Client object
    */
   async connect() {
     if (this.args.credential) {
@@ -94,10 +94,12 @@ module.exports = class MQTTAsync {
       await this.client.end();
       this.isConnected = false;
     });
+
+    return this.client;
   }
 
   /**
-   * Disconnect.
+   * Disconnect from server/broker.
    *
    * @returns {boolean} success
    */
@@ -106,8 +108,9 @@ module.exports = class MQTTAsync {
   }
 
   /**
-   * Connect with the MQTT Server/Broker.
+   * Subscribe to a topic or an array of topics.
    *
+   * @param {array/string} topic Topic or array of topics.
    * @returns {boolean} success
    */
   async subscribe(topic) {
@@ -128,9 +131,9 @@ module.exports = class MQTTAsync {
   }
 
   /**
-   * Unsubscribe from an MQTT topicr.
+   * Unsubscribe from an MQTT topic or array of topics.
    *
-   * @returns {boolean} success
+   * @param {array/string} topic Topic or array of topics.
    */
   async unsubscribe(topic) {
     const subTopic = topic || this.args.topic;
@@ -141,7 +144,8 @@ module.exports = class MQTTAsync {
   /**
    * Send message to MQTT topic.
    *
-   * @returns {boolean} success
+   * @param {arrays/string} topic Topic or array of topics.
+   * @param {string} message Message to send.
    */
   async send(topic, message) {
     await this.client.publish(topic, message)
@@ -154,7 +158,8 @@ module.exports = class MQTTAsync {
   /**
    * Send multiple messages to MQTT topic.
    *
-   * @returns {boolean} success
+   * @param {arrays/string} topic Topic or array of topics.
+   * @param {string} message Message to send.
    */
   async multisend(topic, message) {
     message.forEach(async (msg) => {
@@ -169,7 +174,8 @@ module.exports = class MQTTAsync {
   /**
    * Connect and send multiple messages to MQTT topic.
    *
-   * @returns {boolean} success
+   * @param {arrays/string} topic Topic or array of topics.
+   * @param {string} message Message to send.
    */
   async publish(topic, message) {
     const pubTopic = topic || this.args.topic;

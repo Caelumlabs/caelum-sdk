@@ -38,7 +38,7 @@
     "bip39": "^3.0.4",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",
-    "mqtt": "file:../Proyectos/MQTT.js",
+    "mqtt": "^4.3.4",
     "zenroom": "2.2.0-ac5583a7"
   }
 }
