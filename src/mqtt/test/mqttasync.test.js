@@ -8,9 +8,8 @@ const MQTTAsync = require('../async/mqtt.js');
 
 const options = {
   hostname: 'localhost',
-  port: 1883,
-  topic: 'vehicle/ca01/gas',
-  message: 'This is a content message',
+  port: 2883,
+  protocol: 'mqtt',
   username: 'MyUserName',
   password: 'MySecretPassword',
   credential: 'MyCredential',
@@ -49,7 +48,6 @@ const myError2 = (error) => {
 }
 
 (async () => {
-  options.topic = 'vehicle/#';
   const sub = new MQTTAsync(options);
   sub.handleConnect = myConnection;
   sub.handleMessage = myMessage;
@@ -61,18 +59,16 @@ const myError2 = (error) => {
     console.log('Connected!!');
   }
 
-  await sub.subscribe();
-  await sub.subscribe('idspace/data');
-
-  options.topic = 'vehicle/car01/gastank';
+  await sub.subscribe('vehicles/#');
+ 
   const pub = new MQTTAsync(options);
   pub.handleConnect = myConnection2;
   pub.handleMessage = myMessage2;
   pub.handleError = myError2;
   pub.handleDisconnect = myDisconnection2;
   await pub.connect();
-  await pub.publish();
-  await pub.publish('idspace/data', 'Another message');
-  await pub.disconnect();
-  await sub.disconnect();
+  await pub.publish('vehicles/mycar/battery', 'battery full');
+  
+  await pub.disconnect()
+  await sub.disconnect()
 })();
